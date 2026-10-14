@@ -7,7 +7,7 @@
     <div>
         <div class="d-flex align-items-center gap-2 mb-1">
             <span class="badge bg-light text-dark border font-monospace">{{ $supplier->code }}</span>
-            <span class="badge bg-primary-subtle text-primary">{{ $supplier->payment_terms_days }} দিনের ক্রেডিট</span>
+            <span class="badge bg-primary-subtle text-primary">{{ $supplier->payment_terms_days }} Days Credit</span>
         </div>
         <h4 class="fw-bold mb-1 text-dark">{{ $supplier->name }}</h4>
         <p class="text-muted small mb-0">{{ $supplier->city }}</p>
@@ -23,31 +23,31 @@
         <div class="card card-custom border-0 shadow-sm h-100">
             <div class="card-header bg-white border-bottom py-3">
                 <h6 class="fw-bold mb-0 text-dark">
-                    <i class="bi bi-person-lines-fill text-primary me-2"></i> যোগাযোগ ও সাধারণ বিবরণ
+                    <i class="bi bi-person-lines-fill text-primary me-2"></i> Contact & General Details
                 </h6>
             </div>
             <div class="card-body">
                 <table class="table table-sm table-borderless mb-0">
                     <tbody>
                         <tr>
-                            <td class="text-muted" style="width: 40%;">যোগাযোগ ব্যক্তি:</td>
+                            <td class="text-muted" style="width: 40%;">Contact Person:</td>
                             <td class="fw-semibold text-dark">{{ $supplier->contact_person ?? '—' }}</td>
                         </tr>
                         <tr>
-                            <td class="text-muted">ফোন নম্বর:</td>
+                            <td class="text-muted">Phone Number:</td>
                             <td class="text-dark">{{ $supplier->phone ?? '—' }}</td>
                         </tr>
                         <tr>
-                            <td class="text-muted">ইমেইল:</td>
+                            <td class="text-muted">Email Address:</td>
                             <td class="text-dark">{{ $supplier->email ?? '—' }}</td>
                         </tr>
                         <tr>
-                            <td class="text-muted">ঠিকানা:</td>
+                            <td class="text-muted">Office Address:</td>
                             <td class="text-dark">{{ $supplier->address ?? '—' }}</td>
                         </tr>
                         <tr>
-                            <td class="text-muted">ক্রেডিট লিমিট মেয়াদ:</td>
-                            <td class="text-dark fw-bold">{{ $supplier->payment_terms_days }} দিন</td>
+                            <td class="text-muted">Credit Terms:</td>
+                            <td class="text-dark fw-bold">{{ $supplier->payment_terms_days }} Days</td>
                         </tr>
                     </tbody>
                 </table>
@@ -59,34 +59,34 @@
         <div class="card card-custom border-0 shadow-sm h-100">
             <div class="card-header bg-white border-bottom py-3">
                 <h6 class="fw-bold mb-0 text-dark">
-                    <i class="bi bi-bank text-success me-2"></i> ট্যাক্স ও ব্যাংকিং তথ্য
+                    <i class="bi bi-bank text-success me-2"></i> Tax & Banking Credentials
                 </h6>
             </div>
             <div class="card-body">
                 <table class="table table-sm table-borderless mb-0">
                     <tbody>
                         <tr>
-                            <td class="text-muted" style="width: 40%;">ট্রেড লাইসেন্স নং:</td>
+                            <td class="text-muted" style="width: 40%;">Trade License No:</td>
                             <td class="fw-semibold text-dark">{{ $supplier->trade_license ?? '—' }}</td>
                         </tr>
                         <tr>
-                            <td class="text-muted">ই-টিন (TIN):</td>
+                            <td class="text-muted">e-TIN:</td>
                             <td class="fw-semibold text-dark">{{ $supplier->tin ?? '—' }}</td>
                         </tr>
                         <tr>
-                            <td class="text-muted">ভ্যাট বিন (BIN):</td>
+                            <td class="text-muted">VAT BIN:</td>
                             <td class="fw-semibold text-dark">{{ $supplier->bin ?? '—' }}</td>
                         </tr>
                         <tr>
-                            <td class="text-muted">ব্যাংকের নাম:</td>
+                            <td class="text-muted">Bank Name:</td>
                             <td class="text-dark">{{ $supplier->bank_name ?? '—' }}</td>
                         </tr>
                         <tr>
-                            <td class="text-muted">অ্যাকাউন্ট নং:</td>
+                            <td class="text-muted">Account Number:</td>
                             <td class="text-dark font-monospace">{{ $supplier->bank_account_no ?? '—' }}</td>
                         </tr>
                         <tr>
-                            <td class="text-muted">শাখা:</td>
+                            <td class="text-muted">Branch Name:</td>
                             <td class="text-dark">{{ $supplier->bank_branch ?? '—' }}</td>
                         </tr>
                     </tbody>

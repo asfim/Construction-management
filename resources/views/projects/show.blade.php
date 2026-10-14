@@ -13,18 +13,18 @@
         </div>
         <h4 class="fw-bold mb-1 text-dark">{{ $project->name }}</h4>
         <p class="text-muted small mb-0">
-            <i class="bi bi-geo-alt me-1"></i> {{ $project->site_address ?? 'সাইট ঠিকানা নির্দিষ্ট করা নেই' }}
+            <i class="bi bi-geo-alt me-1"></i> {{ $project->site_address ?? 'No site address specified' }}
             @if($project->city) ({{ $project->city }}, {{ $project->division }}) @endif
         </p>
     </div>
     <div class="d-flex align-items-center gap-2">
         <a href="{{ route('projects.boqs.index', $project) }}" class="btn btn-primary d-flex align-items-center gap-2 shadow-sm">
             <i class="bi bi-file-earmark-spreadsheet"></i>
-            <span>বিওকিউ ও প্রাক্কলন</span>
+            <span>BOQ & Estimates</span>
         </a>
         <a href="{{ route('projects.budget.show', $project) }}" class="btn btn-warning d-flex align-items-center gap-2 shadow-sm text-dark fw-semibold">
             <i class="bi bi-pie-chart"></i>
-            <span>বাজেট ও খরচ</span>
+            <span>Budget & Costs</span>
         </a>
         @can('project.edit')
         <a href="{{ route('projects.edit', $project) }}" class="btn btn-outline-primary d-flex align-items-center gap-2">
@@ -46,7 +46,7 @@
         <div class="card card-custom p-3 border-0 shadow-sm h-100">
             <span class="text-muted fw-semibold small mb-2 d-block">{{ __('erp.project.contract_value') }}</span>
             <h4 class="fw-bold text-dark mb-1">৳ {{ number_format($project->contract_value, 2) }}</h4>
-            <small class="text-success"><i class="bi bi-check-circle me-1"></i> মোট চুক্তি মূল্য</small>
+            <small class="text-success"><i class="bi bi-check-circle me-1"></i> Total Contract Value</small>
         </div>
     </div>
 
@@ -55,14 +55,14 @@
         <div class="card card-custom p-3 border-0 shadow-sm h-100">
             <span class="text-muted fw-semibold small mb-2 d-block">{{ __('erp.project.budget_amount') }}</span>
             <h4 class="fw-bold text-dark mb-1">৳ {{ number_format($project->budget_amount, 2) }}</h4>
-            <small class="text-muted">অভ্যন্তরীণ বাজেট সীমা</small>
+            <small class="text-muted">Internal Approved Budget</small>
         </div>
     </div>
 
     <!-- Estimated Margin / Buffer -->
     <div class="col-12 col-sm-6 col-xl-3">
         <div class="card card-custom p-3 border-0 shadow-sm h-100">
-            <span class="text-muted fw-semibold small mb-2 d-block">প্রাক্কলিত মার্জিন (Budget Margin)</span>
+            <span class="text-muted fw-semibold small mb-2 d-block">Budget Margin (Markup)</span>
             @php
                 $margin = $project->contract_value - $project->budget_amount;
                 $marginPercent = $project->contract_value > 0 ? ($margin / $project->contract_value) * 100 : 0;
@@ -70,7 +70,7 @@
             <h4 class="fw-bold {{ $margin >= 0 ? 'text-success' : 'text-danger' }} mb-1">
                 ৳ {{ number_format($margin, 2) }}
             </h4>
-            <small class="text-muted">মার্জিন: {{ number_format($marginPercent, 1) }}%</small>
+            <small class="text-muted">Margin: {{ number_format($marginPercent, 1) }}%</small>
         </div>
     </div>
 
@@ -92,7 +92,7 @@
         <div class="card card-custom border-0 shadow-sm h-100">
             <div class="card-header bg-white border-bottom py-3">
                 <h6 class="fw-bold mb-0 text-dark">
-                    <i class="bi bi-briefcase text-primary me-2"></i> চুক্তি ও ক্লায়েন্টের বিবরণ (Contract & Client)
+                    <i class="bi bi-briefcase text-primary me-2"></i> Contract & Client Information
                 </h6>
             </div>
             <div class="card-body">
@@ -115,12 +115,12 @@
                             <td class="text-dark">{{ $project->client_email ?? '—' }}</td>
                         </tr>
                         <tr>
-                            <td class="text-muted">সংশ্লিষ্ট শাখা (Branch):</td>
+                            <td class="text-muted">Branch:</td>
                             <td class="text-dark">{{ $project->branch?->name ?? '—' }}</td>
                         </tr>
                         <tr>
                             <td class="text-muted">{{ __('erp.project.manager') }}:</td>
-                            <td class="fw-semibold text-primary">{{ $project->projectManager?->name ?? 'নিয়োগ হয়নি' }}</td>
+                            <td class="fw-semibold text-primary">{{ $project->projectManager?->name ?? 'Unassigned' }}</td>
                         </tr>
                         <tr>
                             <td class="text-muted">{{ __('erp.project.retention') }}:</td>
@@ -158,16 +158,16 @@
                 <h6 class="fw-bold mb-0 text-dark">
                     <i class="bi bi-people text-success me-2"></i> {{ __('erp.project.team') }}
                 </h6>
-                <span class="badge bg-light text-dark border">{{ $project->members->count() }} জন সদস্য</span>
+                <span class="badge bg-light text-dark border">{{ $project->members->count() }} Members</span>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0">
                         <thead class="table-light small text-muted text-uppercase">
                             <tr>
-                                <th>নাম ও পদবি</th>
-                                <th>সাইট ভূমিকা</th>
-                                <th>যোগাযোগ</th>
+                                <th>Name & Designation</th>
+                                <th>Site Role</th>
+                                <th>Contact</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -190,7 +190,7 @@
                             @empty
                             <tr>
                                 <td colspan="3" class="text-center py-4 text-muted">
-                                    কোনো সাইট টিম সদস্য এখনও বরাদ্দ করা হয়নি।
+                                    No site team members assigned yet.
                                 </td>
                             </tr>
                             @endforelse

@@ -61,7 +61,7 @@ class MaterialRequisitionController extends Controller
         }
 
         return redirect()->route('material-requisitions.show', $mr)
-            ->with('success', 'উপকরণ চাহিদা (MR) সফলভাবে দাখিল করা হয়েছে।');
+            ->with('success', 'Material Requisition (MR) submitted successfully.');
     }
 
     public function show(MaterialRequisition $materialRequisition): View
@@ -85,16 +85,16 @@ class MaterialRequisitionController extends Controller
                 'pm_approved_by' => $user->id,
                 'pm_approved_at' => now(),
             ]);
-            $msg = 'প্রকল্প ব্যবস্থাপক কর্তৃক উপকরণ চাহিদা অনুমোদিত হয়েছে (PM Approved)।';
+            $msg = 'Material requisition approved by Project Manager (PM Approved).';
         } else if ($materialRequisition->status === 'pm_approved') {
             $materialRequisition->update([
                 'status' => 'approved',
                 'approved_by' => $user->id,
                 'approved_at' => now(),
             ]);
-            $msg = 'উপকরণ চাহিদা চূড়ান্তভাবে অনুমোদিত হয়েছে (Final Approved)।';
+            $msg = 'Material requisition has been final approved.';
         } else {
-            return back()->with('error', 'এই রিকুইজিশনটি ইতোমধ্যেই অনুমোদিত অথবা বাতিল করা হয়েছে।');
+            return back()->with('error', 'This requisition is already approved or cancelled.');
         }
 
         return back()->with('success', $msg);

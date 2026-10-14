@@ -5,8 +5,10 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BoqController;
 use App\Http\Controllers\BranchController;
 use App\Http\Controllers\BudgetController;
+use App\Http\Controllers\ClientBillController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\CostCodeController;
+use App\Http\Controllers\DailyProgressReportController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GoodsReceiptController;
 use App\Http\Controllers\InventoryLedgerController;
@@ -15,6 +17,7 @@ use App\Http\Controllers\ItemController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\MaterialRequisitionController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\ProjectExpenseController;
 use App\Http\Controllers\PurchaseOrderController;
 use App\Http\Controllers\RateAnalysisController;
 use App\Http\Controllers\SupplierController;
@@ -85,6 +88,18 @@ Route::middleware(['auth'])->group(function () {
     Route::get('inventory/ledger', [InventoryLedgerController::class, 'index'])->name('inventory.ledger');
     Route::get('inventory/issues/create', [InventoryLedgerController::class, 'createIssue'])->name('inventory.issues.create');
     Route::post('inventory/issues', [InventoryLedgerController::class, 'storeIssue'])->name('inventory.issues.store');
+
+    // Module 8: Daily Progress Reports (DPR)
+    Route::resource('daily-progress-reports', DailyProgressReportController::class)->names('dpr');
+    Route::post('daily-progress-reports/{dpr}/approve', [DailyProgressReportController::class, 'approve'])->name('dpr.approve');
+
+    // Module 9: Measurement & Client Billing (RA Bills)
+    Route::resource('client-bills', ClientBillController::class);
+    Route::post('client-bills/{clientBill}/certify', [ClientBillController::class, 'certify'])->name('client-bills.certify');
+    Route::post('client-bills/{clientBill}/mark-paid', [ClientBillController::class, 'markPaid'])->name('client-bills.mark-paid');
+
+    // Module 10: Project Expenses & Site Cashbook
+    Route::resource('project-expenses', ProjectExpenseController::class);
 
     // Companies & Multi-Tenancy Management
     Route::resource('companies', CompanyController::class);

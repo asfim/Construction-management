@@ -6,7 +6,7 @@
 <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-4 gap-3">
     <div>
         <h4 class="fw-bold mb-1 text-dark">{{ __('erp.nav.audit_logs') }}</h4>
-        <p class="text-muted small mb-0">অপরিবর্তনীয় সিস্টেম কার্যকলাপ ও পরিবর্তন অডিট ট্রেইল</p>
+        <p class="text-muted small mb-0">Immutable system activity audit trail and compliance changes</p>
     </div>
 </div>
 
@@ -16,7 +16,7 @@
         <form method="GET" action="{{ route('audit-logs.index') }}" class="row g-2 align-items-center">
             <div class="col-12 col-md-4">
                 <select name="action" class="form-select">
-                    <option value="">সকল অ্যাকশন (All Actions)</option>
+                    <option value="">All Actions</option>
                     <option value="login" {{ $action == 'login' ? 'selected' : '' }}>Login</option>
                     <option value="logout" {{ $action == 'logout' ? 'selected' : '' }}>Logout</option>
                     <option value="created" {{ $action == 'created' ? 'selected' : '' }}>Created</option>
@@ -26,7 +26,7 @@
             </div>
             <div class="col-12 col-md-4">
                 <select name="user_id" class="form-select">
-                    <option value="">সকল ব্যবহারকারী (All Users)</option>
+                    <option value="">All Users</option>
                     @foreach($users as $user)
                     <option value="{{ $user->id }}" {{ $userId == $user->id ? 'selected' : '' }}>
                         {{ $user->name }} ({{ $user->email }})
@@ -36,7 +36,7 @@
             </div>
             <div class="col-12 col-md-4 d-flex gap-2">
                 <button type="submit" class="btn btn-primary flex-grow-1">
-                    <i class="bi bi-funnel me-1"></i> ফিল্টার করুন
+                    <i class="bi bi-funnel me-1"></i> Filter
                 </button>
                 <a href="{{ route('audit-logs.index') }}" class="btn btn-outline-secondary" title="Reset">
                     <i class="bi bi-arrow-clockwise"></i>
@@ -53,12 +53,12 @@
             <table class="table table-hover align-middle mb-0 font-monospace small">
                 <thead class="table-light text-muted text-uppercase">
                     <tr>
-                        <th style="width: 170px;">তারিখ ও সময়</th>
-                        <th>ব্যবহারকারী</th>
-                        <th>কার্যক্রম</th>
-                        <th>এনটিটি ও আইডি</th>
-                        <th>বিবরণ</th>
-                        <th>আইপি ঠিকানা</th>
+                        <th style="width: 170px;">Timestamp</th>
+                        <th>User</th>
+                        <th>Action</th>
+                        <th>Entity & ID</th>
+                        <th>Description</th>
+                        <th>IP Address</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -95,7 +95,7 @@
                             {{ $log->description }}
                             @if(!empty($log->new_values))
                             <details class="mt-1">
-                                <summary class="text-primary small" style="cursor: pointer;">পরিবর্তিত মান দেখুন</summary>
+                                <summary class="text-primary small" style="cursor: pointer;">View Modified Values</summary>
                                 <pre class="bg-light p-2 rounded mt-1 mb-0" style="font-size: 0.72rem;">{{ json_encode($log->new_values, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
                             </details>
                             @endif
@@ -107,7 +107,7 @@
                     @empty
                     <tr>
                         <td colspan="6" class="text-center py-5 text-muted">
-                            কোনো অডিট রেকর্ড পাওয়া যায়নি।
+                            No audit records found.
                         </td>
                     </tr>
                     @endforelse

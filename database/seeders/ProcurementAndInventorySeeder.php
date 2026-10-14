@@ -41,7 +41,7 @@ class ProcurementAndInventorySeeder extends Seeder
         $centralYard = Warehouse::firstOrCreate(
             ['company_id' => $company->id, 'code' => 'WH-TEJ-01'],
             [
-                'name' => 'Dhaka Central Yard & Warehouse (তেজগাঁও কেন্দ্রীয় গোডাউন)',
+                'name' => 'Dhaka Central Yard & Warehouse (Tejgaon)',
                 'location' => 'Tejgaon I/A, Dhaka-1208',
                 'is_central' => true,
                 'is_active' => true,
@@ -53,7 +53,7 @@ class ProcurementAndInventorySeeder extends Seeder
             ['company_id' => $company->id, 'code' => 'WH-GLS-01'],
             [
                 'project_id' => $project1->id,
-                'name' => 'Gulshan Project Site Store (গুলশান সাইট স্টোর)',
+                'name' => 'Gulshan Project Site Store',
                 'location' => 'Plot 88, Road 17, Gulshan-2, Dhaka',
                 'is_central' => false,
                 'is_active' => true,

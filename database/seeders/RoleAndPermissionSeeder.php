@@ -127,7 +127,7 @@ class RoleAndPermissionSeeder extends Seeder
             'mr.view', 'mr.create', 'mr.approve', 'po.view', 'grn.view', 'grn.approve',
             'warehouse.view', 'warehouse.manage', 'stock.view', 'stock.issue',
             'dpr.view', 'dpr.create', 'dpr.approve', 'mb.view', 'mb.create', 'mb.approve',
-            'bill.view', 'bill.create', 'report.view', 'report.export',
+            'bill.view', 'bill.create', 'bill.certify', 'report.view', 'report.export',
         ]);
 
         // Site Engineer

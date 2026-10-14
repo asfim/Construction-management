@@ -66,7 +66,7 @@ class ItemCategoryController extends Controller
         ItemCategory::create($validated);
 
         return redirect()->route('item-categories.index')
-            ->with('success', 'আইটেম ক্যাটাগরি সফলভাবে তৈরি হয়েছে।');
+            ->with('success', 'Item category created successfully.');
     }
 
     public function edit(ItemCategory $itemCategory, TenantManager $tenantManager): View
@@ -100,7 +100,7 @@ class ItemCategoryController extends Controller
         $itemCategory->update($validated);
 
         return redirect()->route('item-categories.index')
-            ->with('success', 'আইটেম ক্যাটাগরি সফলভাবে হালনাগাদ হয়েছে।');
+            ->with('success', 'Item category updated successfully.');
     }
 
     public function destroy(ItemCategory $itemCategory): RedirectResponse
@@ -108,12 +108,12 @@ class ItemCategoryController extends Controller
         $this->authorize('item.manage');
 
         if ($itemCategory->items()->exists()) {
-            return back()->with('error', 'এই ক্যাটাগরিতে উপাদান/আইটেম সংযুক্ত রয়েছে, মুছে ফেলা যাবে না।');
+            return back()->with('error', 'Cannot delete category because items are associated with it.');
         }
 
         $itemCategory->delete();
 
         return redirect()->route('item-categories.index')
-            ->with('success', 'ক্যাটাগরি সফলভাবে মুছে ফেলা হয়েছে।');
+            ->with('success', 'Item category deleted successfully.');
     }
 }

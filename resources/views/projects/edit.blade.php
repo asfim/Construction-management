@@ -6,7 +6,7 @@
 <div class="d-flex align-items-center justify-content-between mb-4">
     <div>
         <h4 class="fw-bold mb-1 text-dark">{{ __('erp.actions.edit') }}: {{ $project->name }}</h4>
-        <p class="text-muted small mb-0">প্রকল্পের তথ্য, অগ্রগতি এবং চুক্তি বিবরণ হালনাগাদ করুন</p>
+        <p class="text-muted small mb-0">Update project details, execution progress, and contract parameters</p>
     </div>
     <a href="{{ route('projects.show', $project) }}" class="btn btn-outline-secondary d-flex align-items-center gap-2">
         <i class="bi bi-arrow-left"></i>
@@ -16,7 +16,7 @@
 
 @if($errors->any())
 <div class="alert alert-danger alert-dismissible fade show mb-4 border-0 shadow-sm" role="alert">
-    <strong class="d-block mb-1"><i class="bi bi-exclamation-triangle-fill me-1"></i> অনুগ্রহ করে নিচের ত্রুটিগুলি সংশোধন করুন:</strong>
+    <strong class="d-block mb-1"><i class="bi bi-exclamation-triangle-fill me-1"></i> Please correct the following errors:</strong>
     <ul class="mb-0 small ps-3">
         @foreach($errors->all() as $error)
         <li>{{ $error }}</li>
@@ -35,7 +35,7 @@
             <div class="card card-custom border-0 shadow-sm mb-4">
                 <div class="card-header bg-white border-bottom py-3">
                     <h6 class="fw-bold mb-0 text-dark">
-                        <i class="bi bi-info-circle text-primary me-2"></i> ১. সাধারণ প্রকল্পের তথ্য (General Info)
+                        <i class="bi bi-info-circle text-primary me-2"></i> 1. General Project Information
                     </h6>
                 </div>
                 <div class="card-body">
@@ -51,7 +51,7 @@
                         <div class="col-12 col-md-6">
                             <label class="form-label fw-semibold small">{{ __('erp.project.branch') }}</label>
                             <select name="branch_id" class="form-select">
-                                <option value="">শাখা নির্বাচন করুন</option>
+                                <option value="">Select Branch</option>
                                 @foreach($branches as $branch)
                                 <option value="{{ $branch->id }}" {{ old('branch_id', $project->branch_id) == $branch->id ? 'selected' : '' }}>
                                     {{ $branch->name }}
@@ -62,7 +62,7 @@
                         <div class="col-12 col-md-6">
                             <label class="form-label fw-semibold small">{{ __('erp.project.manager') }}</label>
                             <select name="project_manager_id" class="form-select">
-                                <option value="">প্রকল্প ব্যবস্থাপক নির্বাচন করুন</option>
+                                <option value="">Select Project Manager</option>
                                 @foreach($managers as $manager)
                                 <option value="{{ $manager->id }}" {{ old('project_manager_id', $project->project_manager_id) == $manager->id ? 'selected' : '' }}>
                                     {{ $manager->name }} ({{ $manager->designation ?? 'Manager' }})
@@ -82,7 +82,7 @@
             <div class="card card-custom border-0 shadow-sm mb-4">
                 <div class="card-header bg-white border-bottom py-3">
                     <h6 class="fw-bold mb-0 text-dark">
-                        <i class="bi bi-geo-alt text-success me-2"></i> ২. ক্লায়েন্ট ও সাইটের অবস্থান (Client & Site)
+                        <i class="bi bi-geo-alt text-success me-2"></i> 2. Client & Site Location
                     </h6>
                 </div>
                 <div class="card-body">
@@ -108,11 +108,11 @@
                             <input type="text" name="site_address" class="form-control" value="{{ old('site_address', $project->site_address) }}">
                         </div>
                         <div class="col-12 col-md-6">
-                            <label class="form-label fw-semibold small">শহর / জেলা</label>
+                            <label class="form-label fw-semibold small">City / District</label>
                             <input type="text" name="city" class="form-control" value="{{ old('city', $project->city) }}">
                         </div>
                         <div class="col-12 col-md-6">
-                            <label class="form-label fw-semibold small">বিভাগ</label>
+                            <label class="form-label fw-semibold small">Division</label>
                             <input type="text" name="division" class="form-control" value="{{ old('division', $project->division) }}">
                         </div>
                     </div>
@@ -126,7 +126,7 @@
             <div class="card card-custom border-0 shadow-sm mb-4">
                 <div class="card-header bg-white border-bottom py-3">
                     <h6 class="fw-bold mb-0 text-dark">
-                        <i class="bi bi-graph-up text-primary me-2"></i> অগ্রগতি ও স্ট্যাটাস
+                        <i class="bi bi-graph-up text-primary me-2"></i> Progress & Status
                     </h6>
                 </div>
                 <div class="card-body">
@@ -139,7 +139,7 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label fw-semibold small">বর্তমান স্ট্যাটাস <span class="text-danger">*</span></label>
+                        <label class="form-label fw-semibold small">Current Status <span class="text-danger">*</span></label>
                         <select name="status" class="form-select" required>
                             <option value="planning" {{ old('status', $project->status) == 'planning' ? 'selected' : '' }}>{{ __('erp.status.planning') }}</option>
                             <option value="active" {{ old('status', $project->status) == 'active' ? 'selected' : '' }}>{{ __('erp.status.active') }}</option>
@@ -155,7 +155,7 @@
             <div class="card card-custom border-0 shadow-sm mb-4">
                 <div class="card-header bg-white border-bottom py-3">
                     <h6 class="fw-bold mb-0 text-dark">
-                        <i class="bi bi-cash-coin text-warning me-2"></i> আর্থিক প্যারামিটার (BDT)
+                        <i class="bi bi-cash-coin text-warning me-2"></i> Financial Parameters (BDT)
                     </h6>
                 </div>
                 <div class="card-body">
@@ -198,7 +198,7 @@
             <div class="card card-custom border-0 shadow-sm mb-4">
                 <div class="card-header bg-white border-bottom py-3">
                     <h6 class="fw-bold mb-0 text-dark">
-                        <i class="bi bi-calendar-range text-info me-2"></i> সময়সূচি
+                        <i class="bi bi-calendar-range text-info me-2"></i> Timeline & Schedule
                     </h6>
                 </div>
                 <div class="card-body">
@@ -213,7 +213,7 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label fw-semibold small">বর্ধিত সমাপ্তির তারিখ (EOT)</label>
+                        <label class="form-label fw-semibold small">Revised End Date (EOT)</label>
                         <input type="date" name="revised_end_date" class="form-control" value="{{ old('revised_end_date', $project->revised_end_date?->toDateString()) }}">
                     </div>
                 </div>

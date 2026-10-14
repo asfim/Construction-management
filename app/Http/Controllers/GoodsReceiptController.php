@@ -99,7 +99,7 @@ class GoodsReceiptController extends Controller
         });
 
         return redirect()->route('goods-receipts.show', $grn)
-            ->with('success', 'পণ্য প্রাপ্তি নোট (GRN) সফলভাবে সংরক্ষিত হয়েছে।');
+            ->with('success', 'Goods Receipt Note (GRN) created successfully.');
     }
 
     public function show(GoodsReceipt $goodsReceipt): View
@@ -123,11 +123,11 @@ class GoodsReceiptController extends Controller
         $this->authorize('grn.approve');
 
         if ($goodsReceipt->status === 'approved') {
-            return back()->with('error', 'এই GRN ইতোমধ্যেই অনুমোদিত হয়েছে।');
+            return back()->with('error', 'This GRN has already been approved.');
         }
 
         $goodsReceipt->approveAndPostStock(auth()->id());
 
-        return back()->with('success', 'GRN অনুমোদিত হয়েছে এবং গোডাউন স্টকে পণ্য যোগ হয়েছে।');
+        return back()->with('success', 'GRN approved successfully and stock posted to warehouse.');
     }
 }

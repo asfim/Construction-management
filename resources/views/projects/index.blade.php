@@ -6,7 +6,7 @@
 <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-4 gap-3">
     <div>
         <h4 class="fw-bold mb-1 text-dark">{{ __('erp.nav.project_list') }}</h4>
-        <p class="text-muted small mb-0">সকল কনস্ট্রাকশন প্রকল্প ও সাইট তদারকি তালিকা</p>
+        <p class="text-muted small mb-0">All construction projects and active site supervision list</p>
     </div>
     @can('project.create')
     <a href="{{ route('projects.create') }}" class="btn btn-primary d-flex align-items-center gap-2 shadow-sm">
@@ -28,7 +28,7 @@
             </div>
             <div class="col-6 col-md-4">
                 <select name="status" class="form-select">
-                    <option value="">সকল স্ট্যাটাস (All Statuses)</option>
+                    <option value="">All Statuses</option>
                     <option value="planning" {{ $status == 'planning' ? 'selected' : '' }}>{{ __('erp.status.planning') }}</option>
                     <option value="active" {{ $status == 'active' ? 'selected' : '' }}>{{ __('erp.status.active') }}</option>
                     <option value="on_hold" {{ $status == 'on_hold' ? 'selected' : '' }}>{{ __('erp.status.on_hold') }}</option>
@@ -60,7 +60,7 @@
                         <th>{{ __('erp.project.contract_value') }}</th>
                         <th>{{ __('erp.project.budget_amount') }}</th>
                         <th>{{ __('erp.project.progress') }}</th>
-                        <th>স্ট্যাটাস</th>
+                        <th>Status</th>
                         <th class="text-end">{{ __('erp.actions.details') }}</th>
                     </tr>
                 </thead>

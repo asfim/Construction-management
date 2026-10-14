@@ -55,7 +55,7 @@ class RateAnalysisController extends Controller
 
         $rateAnalysis->components()->create($validated);
 
-        return back()->with('success', 'কম্পোনেন্ট সফলভাবে যোগ করা হয়েছে।');
+        return back()->with('success', 'Component added successfully.');
     }
 
     public function updateParameters(Request $request, RateAnalysis $rateAnalysis): RedirectResponse
@@ -76,6 +76,6 @@ class RateAnalysisController extends Controller
             $rateAnalysis->boqItem->update(['unit_rate' => $rateAnalysis->total_unit_rate]);
         }
 
-        return back()->with('success', 'রেট অ্যানালাইসিস প্যারামিটার ও ইউনিট রেট সফলভাবে হালনাগাদ করা হয়েছে।');
+        return back()->with('success', 'Rate analysis parameters and unit rate updated successfully.');
     }
 }

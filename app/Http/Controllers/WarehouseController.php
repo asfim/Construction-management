@@ -75,7 +75,7 @@ class WarehouseController extends Controller
         Warehouse::create($validated);
 
         return redirect()->route('warehouses.index')
-            ->with('success', 'গোডাউন / সাইট স্টোর সফলভাবে যোগ করা হয়েছে।');
+            ->with('success', 'Warehouse / Store created successfully.');
     }
 
     public function edit(Warehouse $warehouse, TenantManager $tenantManager): View
@@ -111,7 +111,7 @@ class WarehouseController extends Controller
         $warehouse->update($validated);
 
         return redirect()->route('warehouses.index')
-            ->with('success', 'গোডাউনের তথ্য সফলভাবে হালনাগাদ করা হয়েছে।');
+            ->with('success', 'Warehouse updated successfully.');
     }
 
     public function destroy(Warehouse $warehouse): RedirectResponse
@@ -119,12 +119,12 @@ class WarehouseController extends Controller
         $this->authorize('warehouse.manage');
 
         if ($warehouse->transactions()->exists()) {
-            return back()->with('error', 'এই গোডাউনে স্টক ট্রানজ্যাকশন রেকর্ড রয়েছে, তাই মুছে ফেলা সম্ভব নয়।');
+            return back()->with('error', 'Cannot delete warehouse because stock transactions exist.');
         }
 
         $warehouse->delete();
 
         return redirect()->route('warehouses.index')
-            ->with('success', 'গোডাউন সফলভাবে মুছে ফেলা হয়েছে।');
+            ->with('success', 'Warehouse deleted successfully.');
     }
 }

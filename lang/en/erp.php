@@ -7,7 +7,7 @@ return [
     'bangladesh' => 'Bangladesh',
     'bdt' => '৳',
     'currency' => 'BDT (৳)',
-    'switch_language' => 'বাংলা',
+    'switch_language' => 'English',
     'active_company' => 'Active Company',
     'active_project' => 'Active Project',
     'all_projects' => 'All Projects',

@@ -102,7 +102,7 @@ class PurchaseOrderController extends Controller
         });
 
         return redirect()->route('purchase-orders.show', $po)
-            ->with('success', 'ক্রয়াদেশ (PO) সফলভাবে তৈরি করা হয়েছে।');
+            ->with('success', 'Purchase Order (PO) created successfully.');
     }
 
     public function show(PurchaseOrder $purchaseOrder): View
@@ -126,7 +126,7 @@ class PurchaseOrderController extends Controller
         $this->authorize('po.approve');
 
         if ($purchaseOrder->status !== 'draft') {
-            return back()->with('error', 'শুধুমাত্র ড্রাফট ক্রয়াদেশ অনুমোদন করা যাবে।');
+            return back()->with('error', 'Only draft purchase orders can be approved.');
         }
 
         $purchaseOrder->update([
@@ -135,6 +135,6 @@ class PurchaseOrderController extends Controller
             'approved_at' => now(),
         ]);
 
-        return back()->with('success', 'ক্রয়াদেশটি (PO) সফলভাবে অনুমোদন করা হয়েছে।');
+        return back()->with('success', 'Purchase Order (PO) approved successfully.');
     }
 }

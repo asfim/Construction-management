@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
             DemoCompanySeeder::class,
             MaterialAndBoqSeeder::class,
             ProcurementAndInventorySeeder::class,
+            SiteExecutionAndBillingSeeder::class,
         ]);
     }
 }

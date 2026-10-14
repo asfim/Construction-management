@@ -1,17 +1,17 @@
 @extends('layouts.app')
 
-@section('title', 'কোম্পানির শাখা ব্যবস্থাপনা (Branches)')
+@section('title', 'Company Branch Management')
 
 @section('content')
 <div class="d-flex align-items-center justify-content-between mb-4">
     <div>
-        <h4 class="fw-bold mb-1">কোম্পানির শাখা ব্যবস্থাপনা (Branch Management)</h4>
-        <p class="text-muted small mb-0">হেড অফিস ও আঞ্চলিক শাখার তালিকা (নতুন প্রজেক্ট খোলার সময় ড্রপডাউনে ব্যবহৃত)</p>
+        <h4 class="fw-bold mb-1">Company Branch Management</h4>
+        <p class="text-muted small mb-0">Head office and regional branch offices directory (used in project dropdowns)</p>
     </div>
     @can('branch.manage')
     <a href="{{ route('branches.create') }}" class="btn btn-primary d-flex align-items-center gap-2">
         <i class="bi bi-plus-circle"></i>
-        <span>নতুন শাখা যোগ করুন</span>
+        <span>Add New Branch</span>
     </a>
     @endcan
 </div>
@@ -21,10 +21,10 @@
         <form method="GET" action="{{ route('branches.index') }}" class="row g-3 align-items-center">
             <div class="col-md-6">
                 <div class="input-group">
-                    <input type="text" name="search" class="form-control" placeholder="শাখার নাম, কোড বা শহর দিয়ে খুঁজুন..." value="{{ $search }}">
-                    <button class="btn btn-outline-secondary" type="submit"><i class="bi bi-search"></i> খুঁজুন</button>
+                    <input type="text" name="search" class="form-control" placeholder="Search by branch name, code, or city..." value="{{ $search }}">
+                    <button class="btn btn-outline-secondary" type="submit"><i class="bi bi-search"></i> Search</button>
                     @if($search)
-                    <a href="{{ route('branches.index') }}" class="btn btn-outline-danger">রিসেট</a>
+                    <a href="{{ route('branches.index') }}" class="btn btn-outline-danger">Reset</a>
                     @endif
                 </div>
             </div>
@@ -38,14 +38,14 @@
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th class="ps-4">কোড</th>
-                        <th>শাখার নাম</th>
-                        <th>ধরন</th>
-                        <th>যোগাযোগ</th>
-                        <th>শহর ও বিভাগ</th>
-                        <th class="text-center">প্রকল্প সংখ্যা</th>
-                        <th>স্ট্যাটাস</th>
-                        <th class="text-end pe-4">অ্যাকশন</th>
+                        <th class="ps-4">Code</th>
+                        <th>Branch Name</th>
+                        <th>Type</th>
+                        <th>Contact</th>
+                        <th>City & Division</th>
+                        <th class="text-center">Projects</th>
+                        <th>Status</th>
+                        <th class="text-end pe-4">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -54,16 +54,16 @@
                         <td class="ps-4 fw-bold text-primary">{{ $branch->code }}</td>
                         <td>
                             <div class="fw-bold">{{ $branch->name }}</div>
-                            <small class="text-muted">{{ $branch->address ?? 'বাংলাদেশ' }}</small>
+                            <small class="text-muted">{{ $branch->address ?? 'Bangladesh' }}</small>
                         </td>
                         <td>
                             @if($branch->is_head_office)
                                 <span class="badge bg-primary px-2 py-1">
-                                    <i class="bi bi-star-fill me-1"></i> হেড অফিস (Head Office)
+                                    <i class="bi bi-star-fill me-1"></i> Head Office
                                 </span>
                             @else
                                 <span class="badge bg-light text-dark border px-2 py-1">
-                                    আঞ্চলিক শাখা
+                                    Regional Branch
                                 </span>
                             @endif
                         </td>
@@ -71,17 +71,17 @@
                             <div><i class="bi bi-telephone me-1 text-secondary"></i> {{ $branch->phone ?? '—' }}</div>
                             <small class="text-muted"><i class="bi bi-envelope me-1"></i> {{ $branch->email ?? '—' }}</small>
                         </td>
-                        <td>{{ $branch->city ?? 'ঢাকা' }}, {{ $branch->division ?? 'ঢাকা' }}</td>
+                        <td>{{ $branch->city ?? 'Dhaka' }}, {{ $branch->division ?? 'Dhaka' }}</td>
                         <td class="text-center">
                             <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-pill">
-                                {{ $branch->projects_count }} টি প্রকল্প
+                                {{ $branch->projects_count }} Projects
                             </span>
                         </td>
                         <td>
                             @if($branch->is_active)
-                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">সক্রিয়</span>
+                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">Active</span>
                             @else
-                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1">নিষ্ক্রিয়</span>
+                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1">Inactive</span>
                             @endif
                         </td>
                         <td class="text-end pe-4">
@@ -89,7 +89,7 @@
                             <a href="{{ route('branches.edit', $branch) }}" class="btn btn-sm btn-outline-primary me-1">
                                 <i class="bi bi-pencil"></i>
                             </a>
-                            <form action="{{ route('branches.destroy', $branch) }}" method="POST" class="d-inline-block" onsubmit="return confirm('আপনি কি এই শাখা মুছে ফেলতে চান?');">
+                            <form action="{{ route('branches.destroy', $branch) }}" method="POST" class="d-inline-block" onsubmit="return confirm('Are you sure you want to delete this branch?');">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn btn-sm btn-outline-danger" {{ $branch->projects_count > 0 ? 'disabled' : '' }}>
@@ -103,7 +103,7 @@
                     <tr>
                         <td colspan="8" class="text-center py-5 text-muted">
                             <i class="bi bi-buildings fs-1 d-block mb-2 text-secondary opacity-50"></i>
-                            কোনো শাখা পাওয়া যায়নি।
+                            No branches found.
                         </td>
                     </tr>
                     @endforelse

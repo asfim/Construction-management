@@ -71,6 +71,6 @@ class BudgetController extends Controller
 
         $budget->recalculate();
 
-        return back()->with('success', 'বাজেট লাইন সফলভাবে হালনাগাদ করা হয়েছে।');
+        return back()->with('success', 'Budget line updated successfully.');
     }
 }

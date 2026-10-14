@@ -24,38 +24,38 @@
         <div class="card card-custom border-0 shadow-sm h-100">
             <div class="card-header bg-white border-bottom py-3">
                 <h6 class="fw-bold mb-0 text-dark">
-                    <i class="bi bi-file-earmark-check text-primary me-2"></i> আইনগত ও কর তথ্য (Tax & Compliance)
+                    <i class="bi bi-file-earmark-check text-primary me-2"></i> Tax & Legal Compliance
                 </h6>
             </div>
             <div class="card-body">
                 <table class="table table-sm table-borderless mb-0">
                     <tbody>
                         <tr>
-                            <td class="text-muted" style="width: 45%;">ট্রেড লাইসেন্স নং:</td>
+                            <td class="text-muted" style="width: 45%;">Trade License No:</td>
                             <td class="fw-semibold text-dark">{{ $company->trade_license ?? '—' }}</td>
                         </tr>
                         <tr>
-                            <td class="text-muted">ই-টিন (TIN):</td>
+                            <td class="text-muted">e-TIN:</td>
                             <td class="fw-semibold text-dark">{{ $company->tin ?? '—' }}</td>
                         </tr>
                         <tr>
-                            <td class="text-muted">ভ্যাট বিন (BIN):</td>
+                            <td class="text-muted">VAT BIN:</td>
                             <td class="fw-semibold text-dark">{{ $company->bin ?? '—' }}</td>
                         </tr>
                         <tr>
-                            <td class="text-muted">অর্থবছর শুরু:</td>
+                            <td class="text-muted">Fiscal Year Start:</td>
                             <td class="text-dark">{{ $company->fiscal_year_start }} (July 1st)</td>
                         </tr>
                         <tr>
-                            <td class="text-muted">ফোন:</td>
+                            <td class="text-muted">Phone Number:</td>
                             <td class="text-dark">{{ $company->phone ?? '—' }}</td>
                         </tr>
                         <tr>
-                            <td class="text-muted">ইমেইল:</td>
+                            <td class="text-muted">Email Address:</td>
                             <td class="text-dark">{{ $company->email ?? '—' }}</td>
                         </tr>
                         <tr>
-                            <td class="text-muted">ঠিকানা:</td>
+                            <td class="text-muted">Office Address:</td>
                             <td class="text-dark">{{ $company->address ?? '—' }}</td>
                         </tr>
                     </tbody>
@@ -69,7 +69,7 @@
         <div class="card card-custom border-0 shadow-sm h-100">
             <div class="card-header bg-white border-bottom py-3">
                 <h6 class="fw-bold mb-0 text-dark">
-                    <i class="bi bi-diagram-3 text-success me-2"></i> শাখাসমূহ (Branches)
+                    <i class="bi bi-diagram-3 text-success me-2"></i> Company Branches
                 </h6>
             </div>
             <div class="card-body p-0">
@@ -77,10 +77,10 @@
                     <table class="table table-hover align-middle mb-0">
                         <thead class="table-light small text-muted text-uppercase">
                             <tr>
-                                <th>কোড</th>
-                                <th>নাম</th>
-                                <th>যোগাযোগ</th>
-                                <th>অবস্থান</th>
+                                <th>Code</th>
+                                <th>Branch Name</th>
+                                <th>Contact</th>
+                                <th>Location</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -92,7 +92,7 @@
                                 <td>
                                     <div class="fw-bold text-dark">{{ $branch->name }}</div>
                                     @if($branch->is_head_office)
-                                    <span class="badge bg-warning-subtle text-warning-emphasis" style="font-size: 0.7rem;">প্রধান কার্যালয়</span>
+                                    <span class="badge bg-warning-subtle text-warning-emphasis" style="font-size: 0.7rem;">Head Office</span>
                                     @endif
                                 </td>
                                 <td>
@@ -105,7 +105,7 @@
                             @empty
                             <tr>
                                 <td colspan="4" class="text-center py-4 text-muted">
-                                    কোনো শাখা পাওয়া যায়নি।
+                                    No branches found.
                                 </td>
                             </tr>
                             @endforelse

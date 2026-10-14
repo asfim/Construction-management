@@ -44,7 +44,7 @@ class BoqController extends Controller
         abort_if($boq->project_id !== $project->id, 404);
 
         if ($boq->is_locked) {
-            return back()->with('error', 'এই বিওকিউ সংস্করণটি অনুমোদিত ও লক করা হয়েছে। নতুন আইটেম যোগ করতে হলে নতুন সংস্করণ (Revision) তৈরি করুন।');
+            return back()->with('error', 'This BOQ version is approved and locked. To add items, create a new revision.');
         }
 
         $validated = $request->validated();
@@ -69,7 +69,7 @@ class BoqController extends Controller
             'company_id' => $tenantManager->currentCompanyId(),
             'project_id' => $project->id,
             'version_number' => $newVersionNumber,
-            'title' => "Variation Revision {$newVersionNumber} (ভ্যারিয়েশন সংস্করণ {$newVersionNumber})",
+            'title' => "Variation Revision {$newVersionNumber}",
             'total_amount' => $boq->total_amount,
             'status' => 'draft',
             'is_locked' => false,
@@ -85,7 +85,7 @@ class BoqController extends Controller
         }
 
         return redirect()->route('projects.boqs.show', [$project, $newBoq])
-            ->with('success', "নতুন বিওকিউ সংস্করণ {$newVersionNumber} সফলভাবে তৈরি করা হয়েছে। ঐতিহাসিক সংস্করণ অপরিবর্তিত রয়েছে।");
+            ->with('success', "New BOQ Revision {$newVersionNumber} created successfully. Baseline preserved.");
     }
 
     public function approve(Project $project, BoqVersion $boq): RedirectResponse
@@ -95,7 +95,7 @@ class BoqController extends Controller
         abort_if($boq->project_id !== $project->id, 404);
 
         if ($boq->is_locked) {
-            return back()->with('error', 'এই বিওকিউ সংস্করণটি ইতোমধ্যে অনুমোদিত।');
+            return back()->with('error', 'This BOQ version is already approved.');
         }
 
         $boq->update([
@@ -105,6 +105,6 @@ class BoqController extends Controller
             'approved_at' => now(),
         ]);
 
-        return back()->with('success', 'বিওকিউ সংস্করণ সফলভাবে অনুমোদিত এবং স্থায়ীভাবে লক করা হয়েছে।');
+        return back()->with('success', 'BOQ version approved and baseline locked successfully.');
     }
 }

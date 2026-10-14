@@ -574,7 +574,7 @@
             @endcan
 
             @if(isset($currentProject) && $currentProject)
-            <div class="nav-category">প্রকল্প কার্যক্রম ({{ Str::limit($currentProject->name, 16) }})</div>
+            <div class="nav-category">Project Workspace ({{ Str::limit($currentProject->name, 16) }})</div>
             <a href="{{ route('projects.boqs.index', $currentProject) }}" class="nav-item-link {{ request()->routeIs('projects.boqs.*') || request()->routeIs('boq-items.*') ? 'active' : '' }}">
                 <i class="bi bi-file-earmark-spreadsheet"></i>
                 <span>{{ __('erp.nav.boq_estimation') }}</span>
@@ -585,39 +585,59 @@
             </a>
             @endif
 
-            <div class="nav-category">সংগ্রহ ও ইনভেন্টরি (Procurement & Stock)</div>
+            <div class="nav-category">Site Execution & Billing</div>
+            @can('dpr.view')
+            <a href="{{ route('dpr.index') }}" class="nav-item-link {{ request()->routeIs('dpr.*') ? 'active' : '' }}">
+                <i class="bi bi-calendar-check"></i>
+                <span>Daily Progress (DPR)</span>
+            </a>
+            @endcan
+            @can('bill.view')
+            <a href="{{ route('client-bills.index') }}" class="nav-item-link {{ request()->routeIs('client-bills.*') ? 'active' : '' }}">
+                <i class="bi bi-receipt"></i>
+                <span>Client Billing (RA Bills)</span>
+            </a>
+            @endcan
+            @can('budget.view')
+            <a href="{{ route('project-expenses.index') }}" class="nav-item-link {{ request()->routeIs('project-expenses.*') ? 'active' : '' }}">
+                <i class="bi bi-cash-stack"></i>
+                <span>Project Expenses</span>
+            </a>
+            @endcan
+
+            <div class="nav-category">Procurement & Inventory</div>
             @can('mr.view')
             <a href="{{ route('material-requisitions.index') }}" class="nav-item-link {{ request()->routeIs('material-requisitions.*') ? 'active' : '' }}">
                 <i class="bi bi-card-checklist"></i>
-                <span>উপকরণ চাহিদা (MR)</span>
+                <span>Material Requisitions (MR)</span>
             </a>
             @endcan
             @can('po.view')
             <a href="{{ route('purchase-orders.index') }}" class="nav-item-link {{ request()->routeIs('purchase-orders.*') ? 'active' : '' }}">
                 <i class="bi bi-cart3"></i>
-                <span>ক্রয়াদেশ (Purchase Orders)</span>
+                <span>Purchase Orders (PO)</span>
             </a>
             @endcan
             @can('grn.view')
             <a href="{{ route('goods-receipts.index') }}" class="nav-item-link {{ request()->routeIs('goods-receipts.*') ? 'active' : '' }}">
                 <i class="bi bi-box-arrow-in-down"></i>
-                <span>পণ্য প্রাপ্তি (GRN)</span>
+                <span>Goods Receipts (GRN)</span>
             </a>
             @endcan
             @can('stock.view')
             <a href="{{ route('inventory.ledger') }}" class="nav-item-link {{ request()->routeIs('inventory.*') ? 'active' : '' }}">
                 <i class="bi bi-boxes"></i>
-                <span>স্টক খতিয়ান (Inventory Ledger)</span>
+                <span>Stock Ledger & Balance</span>
             </a>
             @endcan
             @can('warehouse.view')
             <a href="{{ route('warehouses.index') }}" class="nav-item-link {{ request()->routeIs('warehouses.*') ? 'active' : '' }}">
                 <i class="bi bi-building"></i>
-                <span>গোডাউন ও সাইট স্টোর</span>
+                <span>Warehouses & Stores</span>
             </a>
             @endcan
 
-            <div class="nav-category">উপাদান ও মাস্টার ডাটা (Materials & Masters)</div>
+            <div class="nav-category">Materials & Master Data</div>
             @can('item.view')
             <a href="{{ route('items.index') }}" class="nav-item-link {{ request()->routeIs('items.*') ? 'active' : '' }}">
                 <i class="bi bi-box-seam"></i>
@@ -625,11 +645,11 @@
             </a>
             <a href="{{ route('item-categories.index') }}" class="nav-item-link {{ request()->routeIs('item-categories.*') ? 'active' : '' }}">
                 <i class="bi bi-tags"></i>
-                <span>আইটেম ক্যাটাগরি (Categories)</span>
+                <span>Item Categories</span>
             </a>
             <a href="{{ route('units.index') }}" class="nav-item-link {{ request()->routeIs('units.*') ? 'active' : '' }}">
                 <i class="bi bi-rulers"></i>
-                <span>পরিমাপের একক (Units)</span>
+                <span>Units of Measurement (UoM)</span>
             </a>
             @endcan
             @can('supplier.view')
@@ -641,7 +661,7 @@
             @can('cost-code.view')
             <a href="{{ route('cost-codes.index') }}" class="nav-item-link {{ request()->routeIs('cost-codes.*') ? 'active' : '' }}">
                 <i class="bi bi-diagram-2"></i>
-                <span>কস্ট কোড ও ডব্লিউবিএস</span>
+                <span>Cost Codes & WBS</span>
             </a>
             @endcan
 
@@ -655,7 +675,7 @@
             @can('branch.view')
             <a href="{{ route('branches.index') }}" class="nav-item-link {{ request()->routeIs('branches.*') ? 'active' : '' }}">
                 <i class="bi bi-diagram-3"></i>
-                <span>শাখা ব্যবস্থাপনা (Branches)</span>
+                <span>Branches</span>
             </a>
             @endcan
             @can('audit.view')
@@ -715,12 +735,11 @@
 
             <!-- Right Controls: Language, Notifications & User Profile -->
             <div class="d-flex align-items-center gap-3">
-                <!-- Language Switcher -->
-                <div class="btn-group">
-                    <a href="{{ route('locale.switch', app()->getLocale() == 'bn' ? 'en' : 'bn') }}" class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1" title="Switch Language">
-                        <i class="bi bi-translate"></i>
-                        <span>{{ __('erp.switch_language') }}</span>
-                    </a>
+                <!-- Language Badge -->
+                <div class="d-none d-sm-flex align-items-center">
+                    <span class="badge bg-light text-secondary border px-2 py-1">
+                        <i class="bi bi-globe2 me-1 text-primary"></i> EN
+                    </span>
                 </div>
 
                 <!-- User Profile Dropdown -->

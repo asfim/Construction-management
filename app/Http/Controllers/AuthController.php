@@ -39,7 +39,7 @@ class AuthController extends Controller
             if (! $user->is_active) {
                 Auth::logout();
                 return back()->withErrors([
-                    'email' => 'আপনার অ্যাকাউন্টটি নিষ্ক্রিয় অবস্থায় রয়েছে। প্রশাসকের সাথে যোগাযোগ করুন।',
+                    'email' => 'Your account is deactivated. Please contact the administrator.',
                 ]);
             }
 
@@ -54,9 +54,8 @@ class AuthController extends Controller
             }
 
             // Set locale
-            if ($user->preferred_locale) {
-                $request->session()->put('locale', $user->preferred_locale);
-            }
+            $locale = $user->preferred_locale && $user->preferred_locale !== 'bn' ? $user->preferred_locale : 'en';
+            $request->session()->put('locale', $locale);
 
             // Record audit log
             AuditLog::create([
@@ -75,7 +74,7 @@ class AuthController extends Controller
         }
 
         return back()->withErrors([
-            'email' => 'ইমেইল অথবা পাসওয়ার্ড সঠিক নয়।',
+            'email' => 'The provided credentials do not match our records.',
         ])->onlyInput('email');
     }
 

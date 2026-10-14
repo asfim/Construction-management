@@ -1,17 +1,17 @@
 @extends('layouts.app')
 
-@section('title', 'ইনভেন্টরি ও গোডাউন স্টক খতিয়ান (Inventory Ledger)')
+@section('title', 'Inventory & Stock Ledger')
 
 @section('content')
 <div class="d-flex align-items-center justify-content-between mb-4">
     <div>
-        <h4 class="fw-bold mb-1">গোডাউন স্টক খতিয়ান ও মালামাল প্রবাহ (Inventory Ledger)</h4>
-        <p class="text-muted small mb-0">সেন্ট্রাল ও সাইট গোডাউনে উপকরণের বর্তমান মজুদ, গড় মূল্য ও মালামাল ইস্যু ট্র্যাকিং</p>
+        <h4 class="fw-bold mb-1">Inventory Ledger & Stock Movement</h4>
+        <p class="text-muted small mb-0">Warehouse stock balances, moving average valuation, receipts, and site issue movements</p>
     </div>
     @can('inventory.issue')
     <a href="{{ route('inventory.issues.create') }}" class="btn btn-warning text-dark d-flex align-items-center gap-2 fw-semibold">
         <i class="bi bi-box-arrow-up-right"></i>
-        <span>সাইটে মালামাল ইস্যু করুন (Issue Stock)</span>
+        <span>Issue Stock to Site</span>
     </a>
     @endcan
 </div>
@@ -19,19 +19,19 @@
 <!-- Stock Cards / Balances Table -->
 <div class="card card-custom mb-4">
     <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-        <h5 class="fw-bold mb-0 text-primary"><i class="bi bi-boxes me-2"></i>বর্তমান গোডাউন মজুদ (Stock Balances by Item)</h5>
-        <span class="badge bg-primary-subtle text-primary border border-primary-subtle">{{ $stockBalances->count() }} টি উপকরণ মজুদে রয়েছে</span>
+        <h5 class="fw-bold mb-0 text-primary"><i class="bi bi-boxes me-2"></i>Current Stock Balances by Warehouse</h5>
+        <span class="badge bg-primary-subtle text-primary border border-primary-subtle">{{ $stockBalances->count() }} Items in Stock</span>
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th class="ps-4">উপকরণের নাম ও কোড</th>
-                        <th>গোডাউন (Warehouse)</th>
-                        <th class="text-end">বর্তমান মজুদ পরিমাণ</th>
-                        <th class="text-end">গড় একক মূল্য (৳)</th>
-                        <th class="text-end pe-4">মোট স্টক মূল্য (৳)</th>
+                        <th class="ps-4">Item Name & Code</th>
+                        <th>Warehouse / Store</th>
+                        <th class="text-end">Current Balance</th>
+                        <th class="text-end">Avg. Cost Rate (৳)</th>
+                        <th class="text-end pe-4">Total Stock Valuation (৳)</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -57,7 +57,7 @@
                     @empty
                     <tr>
                         <td colspan="5" class="text-center py-4 text-muted">
-                            কোনো গোডাউনে বর্তমানে পজিটিভ স্টক নেই।
+                            No positive stock balances recorded.
                         </td>
                     </tr>
                     @endforelse
@@ -72,19 +72,19 @@
     <div class="card-header bg-white py-3">
         <div class="row align-items-center g-3">
             <div class="col-md-6">
-                <h5 class="fw-bold mb-0"><i class="bi bi-clock-history me-2"></i>মালামাল গ্রহণ ও ইস্যুর হিসাব বিবরণী (Movement History)</h5>
+                <h5 class="fw-bold mb-0"><i class="bi bi-clock-history me-2"></i>Stock Movement Transactions</h5>
             </div>
             <div class="col-md-6">
                 <form method="GET" action="{{ route('inventory.ledger') }}" class="d-flex gap-2 justify-content-md-end">
                     <select name="warehouse_id" class="form-select form-select-sm" style="max-width: 200px;" onchange="this.form.submit()">
-                        <option value="">সকল গোডাউন</option>
+                        <option value="">All Warehouses</option>
                         @foreach($warehouses as $wh)
                             <option value="{{ $wh->id }}" {{ $selectedWarehouseId == $wh->id ? 'selected' : '' }}>{{ $wh->name }}</option>
                         @endforeach
                     </select>
 
                     <select name="item_id" class="form-select form-select-sm" style="max-width: 200px;" onchange="this.form.submit()">
-                        <option value="">সকল মালামাল</option>
+                        <option value="">All Materials</option>
                         @foreach($items as $it)
                             <option value="{{ $it->id }}" {{ $selectedItemId == $it->id ? 'selected' : '' }}>{{ $it->name }}</option>
                         @endforeach
@@ -98,15 +98,15 @@
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th class="ps-4">তারিখ</th>
-                        <th>লেনদেনের ধরন</th>
-                        <th>মালামাল</th>
-                        <th>গোডাউন</th>
-                        <th class="text-end">পরিমাণ</th>
-                        <th class="text-end">একক দর (৳)</th>
-                        <th class="text-end">মোট মূল্য (৳)</th>
-                        <th>রেফারেন্স / নোট</th>
-                        <th class="pe-4">এন্ট্রি প্রদানকারী</th>
+                        <th class="ps-4">Date</th>
+                        <th>Transaction Type</th>
+                        <th>Material</th>
+                        <th>Warehouse</th>
+                        <th class="text-end">Quantity</th>
+                        <th class="text-end">Unit Cost (৳)</th>
+                        <th class="text-end">Total Valuation (৳)</th>
+                        <th>Reference / Notes</th>
+                        <th class="pe-4">Entered By</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -116,15 +116,15 @@
                         <td>
                             @if($txn->transaction_type === 'grn_in')
                                 <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
-                                    <i class="bi bi-arrow-down-left me-1"></i> চালান গ্রহণ (GRN In)
+                                    <i class="bi bi-arrow-down-left me-1"></i> GRN Receipt
                                 </span>
                             @elseif($txn->transaction_type === 'issue_out')
                                 <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1">
-                                    <i class="bi bi-arrow-up-right me-1"></i> সাইটে ইস্যু (Issue Out)
+                                    <i class="bi bi-arrow-up-right me-1"></i> Site Issue
                                 </span>
                             @elseif($txn->transaction_type === 'return_in')
                                 <span class="badge bg-info-subtle text-info border border-info-subtle px-2 py-1">
-                                    ফেরত গ্রহণ (Return)
+                                    Stock Return
                                 </span>
                             @else
                                 <span class="badge bg-secondary px-2 py-1">{{ $txn->transaction_type }}</span>
@@ -148,7 +148,7 @@
                     @empty
                     <tr>
                         <td colspan="9" class="text-center py-5 text-muted">
-                            কোনো ইনভেন্টরি ট্রানজ্যাকশন পাওয়া যায়নি।
+                            No inventory transactions found.
                         </td>
                     </tr>
                     @endforelse

@@ -66,7 +66,7 @@ class BranchController extends Controller
         Branch::create($validated);
 
         return redirect()->route('branches.index')
-            ->with('success', 'শাখা সফলভাবে যুক্ত করা হয়েছে।');
+            ->with('success', 'Branch created successfully.');
     }
 
     public function edit(Branch $branch): View
@@ -98,7 +98,7 @@ class BranchController extends Controller
         $branch->update($validated);
 
         return redirect()->route('branches.index')
-            ->with('success', 'শাখার তথ্য সফলভাবে হালনাগাদ হয়েছে।');
+            ->with('success', 'Branch updated successfully.');
     }
 
     public function destroy(Branch $branch): RedirectResponse
@@ -106,12 +106,12 @@ class BranchController extends Controller
         $this->authorize('branch.manage');
 
         if ($branch->projects()->exists()) {
-            return back()->with('error', 'এই শাখার অধীনে চলমান প্রকল্প রয়েছে, তাই মুছে ফেলা সম্ভব নয়।');
+            return back()->with('error', 'Cannot delete branch because active projects are assigned to it.');
         }
 
         $branch->delete();
 
         return redirect()->route('branches.index')
-            ->with('success', 'শাখা মুছে ফেলা হয়েছে।');
+            ->with('success', 'Branch deleted successfully.');
     }
 }

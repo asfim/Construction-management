@@ -22,7 +22,7 @@ class DemoCompanySeeder extends Seeder
             ['code' => 'HTP-CON'],
             [
                 'name' => 'H Tech Provision Construction Ltd.',
-                'legal_name' => 'এইচ টেক প্রভিশন কনস্ট্রাকশন লিমিটেড',
+                'legal_name' => 'H Tech Provision Construction Ltd.',
                 'trade_license' => 'TRAD/DSCC/012984/2024',
                 'tin' => '482910482910',
                 'bin' => '002819482-0101',
@@ -43,7 +43,7 @@ class DemoCompanySeeder extends Seeder
         $dhakaBranch = Branch::firstOrCreate(
             ['company_id' => $company->id, 'code' => 'BR-DHK'],
             [
-                'name' => 'Dhaka Head Office (প্রধান কার্যালয়)',
+                'name' => 'Dhaka Head Office',
                 'phone' => '+88029876543',
                 'email' => 'dhaka@htech.com.bd',
                 'address' => 'House 42, Road 11, Block D, Banani, Dhaka-1213',
@@ -57,7 +57,7 @@ class DemoCompanySeeder extends Seeder
         $ctgBranch = Branch::firstOrCreate(
             ['company_id' => $company->id, 'code' => 'BR-CTG'],
             [
-                'name' => 'Chattogram Regional Branch (চট্টগ্রাম শাখা)',
+                'name' => 'Chattogram Regional Branch',
                 'phone' => '+88031765432',
                 'email' => 'ctg@htech.com.bd',
                 'address' => 'World Trade Center, 5th Floor, Agrabad C/A, Chattogram',
@@ -71,63 +71,63 @@ class DemoCompanySeeder extends Seeder
         // 3. Create Demo Users across Key Roles
         $usersData = [
             [
-                'name' => 'System Super Admin (সুপার অ্যাডমিন)',
+                'name' => 'System Super Admin',
                 'email' => 'superadmin@htech.com.bd',
                 'phone' => '+8801700000001',
                 'designation' => 'Chief Technology Officer',
                 'role' => 'Super Admin',
             ],
             [
-                'name' => 'Engr. Hasan Mahmud (মালিক ও পরিচালক)',
+                'name' => 'Engr. Hasan Mahmud (Managing Director)',
                 'email' => 'owner@htech.com.bd',
                 'phone' => '+8801700000002',
                 'designation' => 'Managing Director & Owner',
                 'role' => 'Company Owner',
             ],
             [
-                'name' => 'Engr. Tariqul Islam (প্রকল্প ব্যবস্থাপক)',
+                'name' => 'Engr. Tariqul Islam (Project Manager)',
                 'email' => 'pm@htech.com.bd',
                 'phone' => '+8801700000003',
                 'designation' => 'Senior Project Manager',
                 'role' => 'Project Manager',
             ],
             [
-                'name' => 'Md. Rafiqul Karim (সাইট ইঞ্জিনিয়ার)',
+                'name' => 'Md. Rafiqul Karim (Site Engineer)',
                 'email' => 'site.engineer@htech.com.bd',
                 'phone' => '+8801700000004',
                 'designation' => 'Resident Site Engineer',
                 'role' => 'Site Engineer',
             ],
             [
-                'name' => 'Nasir Uddin (পরিমাণ জরিপকারী - QS)',
+                'name' => 'Nasir Uddin (Quantity Surveyor - QS)',
                 'email' => 'qs@htech.com.bd',
                 'phone' => '+8801700000005',
                 'designation' => 'Chief Quantity Surveyor',
                 'role' => 'Quantity Surveyor (QS)',
             ],
             [
-                'name' => 'Sabbir Ahmed (সংগ্রহ ব্যবস্থাপক)',
+                'name' => 'Sabbir Ahmed (Procurement Manager)',
                 'email' => 'procurement@htech.com.bd',
                 'phone' => '+8801700000006',
                 'designation' => 'Head of Procurement',
                 'role' => 'Procurement Manager',
             ],
             [
-                'name' => 'Kamal Hossain (স্টোরকিপার)',
+                'name' => 'Kamal Hossain (Storekeeper)',
                 'email' => 'storekeeper@htech.com.bd',
                 'phone' => '+8801700000007',
                 'designation' => 'Central Storekeeper',
                 'role' => 'Storekeeper',
             ],
             [
-                'name' => 'Farhana Akter ACA (হিসাব ব্যবস্থাপক)',
+                'name' => 'Farhana Akter ACA (Accounts Manager)',
                 'email' => 'accounts@htech.com.bd',
                 'phone' => '+8801700000008',
                 'designation' => 'Chief Financial Officer',
                 'role' => 'Accounts Manager',
             ],
             [
-                'name' => 'Zillur Rahman (নিরীক্ষক - Auditor)',
+                'name' => 'Zillur Rahman (Internal Auditor)',
                 'email' => 'auditor@htech.com.bd',
                 'phone' => '+8801700000009',
                 'designation' => 'Internal Audit Lead',
@@ -145,7 +145,7 @@ class DemoCompanySeeder extends Seeder
                     'phone' => $userData['phone'],
                     'designation' => $userData['designation'],
                     'current_company_id' => $company->id,
-                    'preferred_locale' => 'bn',
+                    'preferred_locale' => 'en',
                     'is_active' => true,
                 ]
             );
@@ -174,7 +174,7 @@ class DemoCompanySeeder extends Seeder
             ['company_id' => $company->id, 'code' => 'PRJ-GLS-001'],
             [
                 'branch_id' => $dhakaBranch->id,
-                'name' => 'Gulshan Commercial Tower 14-Story (গুলশান বাণিজ্যিক ভবন ১৪-তলা)',
+                'name' => 'Gulshan Commercial Tower 14-Story',
                 'description' => 'Construction of 14-storied commercial tower with 3 basements including civil, MEP, and finishing work.',
                 'client_name' => 'Apex Horizon Properties Ltd.',
                 'client_contact_person' => 'Mr. Enamul Haque, Chief Engineer',
@@ -200,7 +200,7 @@ class DemoCompanySeeder extends Seeder
             ['company_id' => $company->id, 'code' => 'PRJ-PAD-002'],
             [
                 'branch_id' => $dhakaBranch->id,
-                'name' => 'Padma Bridge Connecting Highway & Culverts Package-3 (পদ্মা সংযোগ সড়ক প্যাকেজ-৩)',
+                'name' => 'Padma Bridge Connecting Highway & Culverts Package-3',
                 'description' => '12.5 km 4-lane rigid pavement highway construction, 6 box culverts, and slope protection.',
                 'client_name' => 'Roads and Highways Department (RHD), Bangladesh',
                 'client_contact_person' => 'Executive Engineer, Munshiganj Division',
@@ -226,7 +226,7 @@ class DemoCompanySeeder extends Seeder
             ['company_id' => $company->id, 'code' => 'PRJ-UTR-003'],
             [
                 'branch_id' => $dhakaBranch->id,
-                'name' => 'Uttara Sector 18 Residential Complex (উত্তরা আবাসিক কমপ্লেক্স)',
+                'name' => 'Uttara Sector 18 Residential Complex',
                 'description' => 'Construction of 10-storied residential building with modern foundation piles and shear walls.',
                 'client_name' => 'Green City Developers Ltd.',
                 'client_contact_person' => 'Engr. Shahinur Rahman',

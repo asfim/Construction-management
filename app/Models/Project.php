@@ -77,6 +77,31 @@ class Project extends Model
             ->withTimestamps();
     }
 
+    public function boqVersions(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(BoqVersion::class);
+    }
+
+    public function budget(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(Budget::class);
+    }
+
+    public function dailyProgressReports(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(DailyProgressReport::class);
+    }
+
+    public function clientBills(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(ClientBill::class);
+    }
+
+    public function expenses(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(ProjectExpense::class);
+    }
+
     public function scopeActive(Builder $query): Builder
     {
         return $query->where('status', 'active');

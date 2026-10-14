@@ -19,7 +19,11 @@ class SetLocaleMiddleware
 
         if (! $locale) {
             $user = auth()->user();
-            $locale = $user?->preferred_locale ?? config('app.locale', 'bn');
+            $locale = $user?->preferred_locale ?? config('app.locale', 'en');
+            // Ensure default is English
+            if ($locale === 'bn') {
+                $locale = 'en';
+            }
             Session::put('locale', $locale);
         }
 

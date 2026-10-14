@@ -17,7 +17,7 @@ return new class extends Migration
             $table->unsignedBigInteger('current_project_id')->nullable()->after('current_company_id');
             $table->string('designation', 100)->nullable()->after('current_project_id');
             $table->string('avatar')->nullable()->after('designation');
-            $table->string('preferred_locale', 10)->default('bn')->after('avatar');
+            $table->string('preferred_locale', 10)->default('en')->after('avatar');
             $table->boolean('is_active')->default(true)->after('preferred_locale');
             $table->softDeletes()->after('updated_at');
 

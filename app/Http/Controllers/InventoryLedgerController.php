@@ -123,7 +123,7 @@ class InventoryLedgerController extends Controller
             $currentStock = $warehouse->stockOfItem($itemData['item_id']);
             if ($currentStock < $itemData['quantity_issued']) {
                 $item = Item::find($itemData['item_id']);
-                return back()->withInput()->with('error', "গোডাউনে '{$item?->name}' এর পর্যাপ্ত স্টক নেই। বর্তমান মজুদ: {$currentStock}, রিকোয়েস্ট: {$itemData['quantity_issued']}");
+                return back()->withInput()->with('error', "Insufficient stock for '{$item?->name}'. Current stock: {$currentStock}, Requested: {$itemData['quantity_issued']}");
             }
         }
 
@@ -160,6 +160,6 @@ class InventoryLedgerController extends Controller
         });
 
         return redirect()->route('inventory.ledger')
-            ->with('success', "স্টক ইস্যু #{$stockIssue->issue_no} সফলভাবে সম্পন্ন হয়েছে এবং গোডাউন স্টক হালনাগাদ করা হয়েছে।");
+            ->with('success', "Stock issue #{$stockIssue->issue_no} completed successfully and warehouse balance updated.");
     }
 }

@@ -33,14 +33,14 @@ class MaterialAndBoqSeeder extends Seeder
 
         // 1. Units
         $units = [
-            ['name' => 'Bag', 'name_bn' => 'ব্যাগ', 'symbol' => 'bag', 'type' => 'unit'],
-            ['name' => 'Ton', 'name_bn' => 'মেট্রিক টন', 'symbol' => 'ton', 'type' => 'weight'],
-            ['name' => 'Kilogram', 'name_bn' => 'কেজি', 'symbol' => 'kg', 'type' => 'weight'],
-            ['name' => 'Cubic Feet', 'name_bn' => 'সিএফটি', 'symbol' => 'cft', 'type' => 'volume'],
-            ['name' => 'Cubic Meter', 'name_bn' => 'ঘনমিটার', 'symbol' => 'cum', 'type' => 'volume'],
-            ['name' => 'Square Feet', 'name_bn' => 'বর্গফুট', 'symbol' => 'sft', 'type' => 'area'],
-            ['name' => 'Running Feet', 'name_bn' => 'আরএফটি', 'symbol' => 'rft', 'type' => 'length'],
-            ['name' => 'Number', 'name_bn' => 'সংখ্যা', 'symbol' => 'nos', 'type' => 'count'],
+            ['name' => 'Bag', 'name_bn' => 'Bag', 'symbol' => 'bag', 'type' => 'unit'],
+            ['name' => 'Ton', 'name_bn' => 'Metric Ton', 'symbol' => 'ton', 'type' => 'weight'],
+            ['name' => 'Kilogram', 'name_bn' => 'Kilogram', 'symbol' => 'kg', 'type' => 'weight'],
+            ['name' => 'Cubic Feet', 'name_bn' => 'Cubic Feet', 'symbol' => 'cft', 'type' => 'volume'],
+            ['name' => 'Cubic Meter', 'name_bn' => 'Cubic Meter', 'symbol' => 'cum', 'type' => 'volume'],
+            ['name' => 'Square Feet', 'name_bn' => 'Square Feet', 'symbol' => 'sft', 'type' => 'area'],
+            ['name' => 'Running Feet', 'name_bn' => 'Running Feet', 'symbol' => 'rft', 'type' => 'length'],
+            ['name' => 'Number', 'name_bn' => 'Number', 'symbol' => 'nos', 'type' => 'count'],
         ];
 
         $unitMap = [];
@@ -73,11 +73,11 @@ class MaterialAndBoqSeeder extends Seeder
 
         // 2. Categories
         $categories = [
-            ['code' => 'CAT-REBAR', 'name' => 'Steel & Rebar', 'name_bn' => 'রড ও স্টিল'],
-            ['code' => 'CAT-CEMENT', 'name' => 'Cement & Binders', 'name_bn' => 'সিমেন্ট ও বাইন্ডার'],
-            ['code' => 'CAT-AGGREGATE', 'name' => 'Sand & Aggregates', 'name_bn' => 'বালু ও পাথর'],
-            ['code' => 'CAT-BRICK', 'name' => 'Bricks & Blocks', 'name_bn' => 'ইট ও ব্লক'],
-            ['code' => 'CAT-FINISH', 'name' => 'Finishing Materials', 'name_bn' => 'ফিনিশিং সামগ্রী'],
+            ['code' => 'CAT-REBAR', 'name' => 'Steel & Rebar', 'name_bn' => 'Steel & Rebar'],
+            ['code' => 'CAT-CEMENT', 'name' => 'Cement & Binders', 'name_bn' => 'Cement & Binders'],
+            ['code' => 'CAT-AGGREGATE', 'name' => 'Sand & Aggregates', 'name_bn' => 'Sand & Aggregates'],
+            ['code' => 'CAT-BRICK', 'name' => 'Bricks & Blocks', 'name_bn' => 'Bricks & Blocks'],
+            ['code' => 'CAT-FINISH', 'name' => 'Finishing Materials', 'name_bn' => 'Finishing Materials'],
         ];
 
         $catMap = [];
@@ -93,7 +93,7 @@ class MaterialAndBoqSeeder extends Seeder
             [
                 'code' => 'MAT-ROD-16MM',
                 'name' => '60-Grade Deformed Rebar 16mm',
-                'name_bn' => '১৬ মিমি ৬০-গ্রেড ডিফর্মড রড',
+                'name_bn' => '16mm 60-Grade Deformed Rebar',
                 'category_id' => $catMap['CAT-REBAR']->id,
                 'unit_id' => $unitMap['ton']->id,
                 'specification' => 'BDS ISO 6935-2 / 500W Grade',
@@ -104,7 +104,7 @@ class MaterialAndBoqSeeder extends Seeder
             [
                 'code' => 'MAT-ROD-20MM',
                 'name' => '60-Grade Deformed Rebar 20mm',
-                'name_bn' => '২০ মিমি ৬০-গ্রেড ডিফর্মড রড',
+                'name_bn' => '20mm 60-Grade Deformed Rebar',
                 'category_id' => $catMap['CAT-REBAR']->id,
                 'unit_id' => $unitMap['ton']->id,
                 'specification' => 'BDS ISO 6935-2 / 500W Grade',
@@ -115,7 +115,7 @@ class MaterialAndBoqSeeder extends Seeder
             [
                 'code' => 'MAT-CEM-OPC',
                 'name' => 'Ordinary Portland Cement (OPC)',
-                'name_bn' => 'অর্ডিনারি পোর্টল্যান্ড সিমেন্ট (ওপিসি)',
+                'name_bn' => 'Ordinary Portland Cement (OPC)',
                 'category_id' => $catMap['CAT-CEMENT']->id,
                 'unit_id' => $unitMap['bag']->id,
                 'specification' => 'BDS EN 197-1 CEM I 42.5N',
@@ -126,7 +126,7 @@ class MaterialAndBoqSeeder extends Seeder
             [
                 'code' => 'MAT-SAND-SYL',
                 'name' => 'Sylhet Coarse Sand (2.5 FM)',
-                'name_bn' => 'সিলেট বালু (২.৫ এফএম)',
+                'name_bn' => 'Sylhet Coarse Sand (2.5 FM)',
                 'category_id' => $catMap['CAT-AGGREGATE']->id,
                 'unit_id' => $unitMap['cft']->id,
                 'specification' => 'Coarse Aggregate FM 2.5 - 2.8',
@@ -137,7 +137,7 @@ class MaterialAndBoqSeeder extends Seeder
             [
                 'code' => 'MAT-STONE-CHIP',
                 'name' => '3/4" Down Stone Chips',
-                'name_bn' => '৩/৪" ভাঙা পাথরের চিপস',
+                'name_bn' => '3/4" Down Stone Chips',
                 'category_id' => $catMap['CAT-AGGREGATE']->id,
                 'unit_id' => $unitMap['cft']->id,
                 'specification' => 'Graded Crushed Boulder Stone 19mm Down',
@@ -148,7 +148,7 @@ class MaterialAndBoqSeeder extends Seeder
             [
                 'code' => 'MAT-BRICK-1ST',
                 'name' => '1st Class Machine-Made Bricks',
-                'name_bn' => '১ম শ্রেণীর অটো ইট',
+                'name_bn' => '1st Class Machine-Made Bricks',
                 'category_id' => $catMap['CAT-BRICK']->id,
                 'unit_id' => $unitMap['nos']->id,
                 'specification' => 'Compressive Strength >= 2000 psi',
@@ -227,11 +227,11 @@ class MaterialAndBoqSeeder extends Seeder
 
         // 5. Cost Codes
         $costCodes = [
-            ['code' => '01-SUB', 'name' => 'Substructure & Foundation', 'name_bn' => 'সাবস্ট্রাকচার ও পাইলিং'],
-            ['code' => '02-SUPER', 'name' => 'Superstructure RCC Frame', 'name_bn' => 'সুপারস্ট্রাকচার আরসিসি কাঠামো'],
-            ['code' => '03-BRICK', 'name' => 'Brickwork & Masonry', 'name_bn' => 'গাঁথুনি কাজ'],
-            ['code' => '04-PLASTER', 'name' => 'Plaster & Surface Finishing', 'name_bn' => 'প্লাস্টার ও ফিনিশিং'],
-            ['code' => '05-MEP', 'name' => 'MEP & Utilities', 'name_bn' => 'ইলেকট্রিক্যাল ও প্লাম্বিং'],
+            ['code' => '01-SUB', 'name' => 'Substructure & Foundation', 'name_bn' => 'Substructure & Foundation'],
+            ['code' => '02-SUPER', 'name' => 'Superstructure RCC Frame', 'name_bn' => 'Superstructure RCC Frame'],
+            ['code' => '03-BRICK', 'name' => 'Brickwork & Masonry', 'name_bn' => 'Brickwork & Masonry'],
+            ['code' => '04-PLASTER', 'name' => 'Plaster & Surface Finishing', 'name_bn' => 'Plaster & Surface Finishing'],
+            ['code' => '05-MEP', 'name' => 'MEP & Utilities', 'name_bn' => 'MEP & Utilities'],
         ];
 
         $codeMap = [];
@@ -252,7 +252,7 @@ class MaterialAndBoqSeeder extends Seeder
                 ['project_id' => $project1->id, 'version_number' => 1],
                 [
                     'company_id' => $company->id,
-                    'title' => 'Original Approved Baseline BOQ (মূল অনুমোদিত বিওকিউ)',
+                    'title' => 'Original Approved Baseline BOQ',
                     'total_amount' => 91265000.00,
                     'status' => 'approved',
                     'is_locked' => true,
@@ -268,7 +268,7 @@ class MaterialAndBoqSeeder extends Seeder
                 [
                     'cost_code_id' => $codeMap['01-SUB']->id,
                     'item_code' => 'BOQ-01.01',
-                    'description' => 'Cast-in-situ reinforced concrete bored piling 500mm diameter including boring, temporary casing, reinforcement cage and tremie pipe pouring (কাস্ট-ইন-সিটু বোর পাইল ৫০০ মিমি).',
+                    'description' => 'Cast-in-situ reinforced concrete bored piling 500mm diameter including boring, temporary casing, reinforcement cage and tremie pipe pouring.',
                     'unit' => 'rft',
                     'planned_quantity' => 12000.0000,
                     'unit_rate' => 1450.00,
@@ -278,7 +278,7 @@ class MaterialAndBoqSeeder extends Seeder
                 [
                     'cost_code_id' => $codeMap['02-SUPER']->id,
                     'item_code' => 'BOQ-02.01',
-                    'description' => 'Cast-in-situ RCC 1:1.5:3 with Sylhet sand & crushed stone chips in columns, shear walls, beams and 150mm thick roof slabs including shuttering (১:১.৫:৩ অনুপাতের আরসিসি ঢালাই).',
+                    'description' => 'Cast-in-situ RCC 1:1.5:3 with Sylhet sand & crushed stone chips in columns, shear walls, beams and 150mm thick roof slabs including shuttering.',
                     'unit' => 'cft',
                     'planned_quantity' => 45000.0000,
                     'unit_rate' => 480.00,
@@ -288,7 +288,7 @@ class MaterialAndBoqSeeder extends Seeder
                 [
                     'cost_code_id' => $codeMap['02-SUPER']->id,
                     'item_code' => 'BOQ-02.02',
-                    'description' => 'Supplying, bending, binding in position 500W / 60-Grade high-strength deformed rebar (১৬/২০/২৫ মিমি ৬০-গ্রেড রড বাঁধাই ও প্লেসমেন্ট).',
+                    'description' => 'Supplying, bending, binding in position 500W / 60-Grade high-strength deformed rebar.',
                     'unit' => 'ton',
                     'planned_quantity' => 350.0000,
                     'unit_rate' => 108000.00,
@@ -298,7 +298,7 @@ class MaterialAndBoqSeeder extends Seeder
                 [
                     'cost_code_id' => $codeMap['03-BRICK']->id,
                     'item_code' => 'BOQ-03.01',
-                    'description' => '125mm thick 1st class brickwork in 1:4 cement-sand mortar in all floor partitions including curing and scaffolding (১২৫ মিমি গাঁথুনি কাজ).',
+                    'description' => '125mm thick 1st class brickwork in 1:4 cement-sand mortar in all floor partitions including curing and scaffolding.',
                     'unit' => 'sft',
                     'planned_quantity' => 65000.0000,
                     'unit_rate' => 145.00,
@@ -308,7 +308,7 @@ class MaterialAndBoqSeeder extends Seeder
                 [
                     'cost_code_id' => $codeMap['04-PLASTER']->id,
                     'item_code' => 'BOQ-04.01',
-                    'description' => '12mm thick cement-sand plaster (1:4) to walls and ceiling including smooth finishing and 14 days water curing (১২ মিমি সিমেন্ট প্লাস্টার).',
+                    'description' => '12mm thick cement-sand plaster (1:4) to walls and ceiling including smooth finishing and 14 days water curing.',
                     'unit' => 'sft',
                     'planned_quantity' => 120000.0000,
                     'unit_rate' => 42.00,
@@ -352,8 +352,8 @@ class MaterialAndBoqSeeder extends Seeder
                     ['component_type' => 'material', 'description' => 'Cement (Seven Rings OPC)', 'unit' => 'bag', 'quantity' => 0.2200, 'rate' => 540.00, 'amount' => 118.80],
                     ['component_type' => 'material', 'description' => 'Sylhet Coarse Sand (2.5 FM)', 'unit' => 'cft', 'quantity' => 0.4400, 'rate' => 45.00, 'amount' => 19.80],
                     ['component_type' => 'material', 'description' => 'Stone Chips 3/4" Down', 'unit' => 'cft', 'quantity' => 0.8800, 'rate' => 210.00, 'amount' => 184.80],
-                    ['component_type' => 'labor', 'description' => 'Head Mason & Masons (রাজমিস্ত্রি)', 'unit' => 'day', 'quantity' => 0.0400, 'rate' => 1000.00, 'amount' => 40.00],
-                    ['component_type' => 'labor', 'description' => 'Helpers / Unskilled Labor (জোগালী)', 'unit' => 'day', 'quantity' => 0.0500, 'rate' => 700.00, 'amount' => 35.00],
+                    ['component_type' => 'labor', 'description' => 'Head Mason & Masons', 'unit' => 'day', 'quantity' => 0.0400, 'rate' => 1000.00, 'amount' => 40.00],
+                    ['component_type' => 'labor', 'description' => 'Helpers / Unskilled Labor', 'unit' => 'day', 'quantity' => 0.0500, 'rate' => 700.00, 'amount' => 35.00],
                     ['component_type' => 'equipment', 'description' => 'Concrete Mixture Machine & Vibrator run', 'unit' => 'cft', 'quantity' => 1.0000, 'rate' => 15.00, 'amount' => 15.00],
                 ];
 

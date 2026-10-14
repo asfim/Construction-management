@@ -217,7 +217,7 @@
                     </li>
                     @empty
                     <li class="list-group-item text-center py-4 text-muted">
-                        কোনো অডিট রেকর্ড পাওয়া যায়নি।
+                        No audit records found.
                     </li>
                     @endforelse
                 </ul>

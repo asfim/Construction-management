@@ -61,7 +61,7 @@ class UnitController extends Controller
         Unit::create($validated);
 
         return redirect()->route('units.index')
-            ->with('success', 'পরিমাপের একক সফলভাবে সংরক্ষণ করা হয়েছে।');
+            ->with('success', 'Unit of measurement created successfully.');
     }
 
     public function edit(Unit $unit): View
@@ -88,7 +88,7 @@ class UnitController extends Controller
         $unit->update($validated);
 
         return redirect()->route('units.index')
-            ->with('success', 'পরিমাপের একক সফলভাবে হালনাগাদ করা হয়েছে।');
+            ->with('success', 'Unit of measurement updated successfully.');
     }
 
     public function destroy(Unit $unit): RedirectResponse
@@ -96,12 +96,12 @@ class UnitController extends Controller
         $this->authorize('item.manage');
 
         if ($unit->items()->exists()) {
-            return back()->with('error', 'এই এককের অধীনে মালামাল যুক্ত রয়েছে, তাই মুছে ফেলা সম্ভব নয়।');
+            return back()->with('error', 'Cannot delete unit because items are associated with it.');
         }
 
         $unit->delete();
 
         return redirect()->route('units.index')
-            ->with('success', 'পরিমাপের একক মুছে ফেলা হয়েছে।');
+            ->with('success', 'Unit of measurement deleted successfully.');
     }
 }
