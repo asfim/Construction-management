@@ -31,7 +31,7 @@
 <div class="row g-4 mb-4">
     <!-- Active Projects -->
     <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card card-custom p-3 h-100 border-0 shadow-sm">
+        <div class="card card-custom kpi-card kpi-indigo p-3 h-100 border-0 shadow-sm">
             <div class="d-flex align-items-center justify-content-between mb-3">
                 <span class="text-muted fw-semibold small">{{ __('erp.dashboard.active_projects') }}</span>
                 <div class="rounded-3 p-2 bg-primary-subtle text-primary">
@@ -47,7 +47,7 @@
 
     <!-- Total Contract Value -->
     <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card card-custom p-3 h-100 border-0 shadow-sm">
+        <div class="card card-custom kpi-card kpi-emerald p-3 h-100 border-0 shadow-sm">
             <div class="d-flex align-items-center justify-content-between mb-3">
                 <span class="text-muted fw-semibold small">{{ __('erp.dashboard.total_contract_value') }}</span>
                 <div class="rounded-3 p-2 bg-success-subtle text-success">
@@ -61,7 +61,7 @@
 
     <!-- Approved Budget -->
     <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card card-custom p-3 h-100 border-0 shadow-sm">
+        <div class="card card-custom kpi-card kpi-amber p-3 h-100 border-0 shadow-sm">
             <div class="d-flex align-items-center justify-content-between mb-3">
                 <span class="text-muted fw-semibold small">{{ __('erp.dashboard.approved_budget') }}</span>
                 <div class="rounded-3 p-2 bg-warning-subtle text-warning">
@@ -75,7 +75,7 @@
 
     <!-- Assigned Engineers & Members -->
     <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card card-custom p-3 h-100 border-0 shadow-sm">
+        <div class="card card-custom kpi-card kpi-sky p-3 h-100 border-0 shadow-sm">
             <div class="d-flex align-items-center justify-content-between mb-3">
                 <span class="text-muted fw-semibold small">{{ __('erp.dashboard.team_members') }}</span>
                 <div class="rounded-3 p-2 bg-info-subtle text-info">
