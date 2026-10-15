@@ -156,3 +156,21 @@ test('quick add ajax endpoints for branch and manager return json', function () 
     ]);
 });
 
+test('authorized user can update project progress percent', function () {
+    $company = Company::where('code', 'HTP-CON')->first();
+    $superadmin = User::where('email', 'superadmin@htech.com.bd')->first();
+    $project = Project::first();
+
+    $response = $this->actingAs($superadmin)
+        ->withSession(['active_company_id' => $company->id])
+        ->patch(route('projects.progress.update', $project), [
+            'progress_percent' => '45.5',
+            'status' => 'active',
+        ]);
+
+    $response->assertRedirect();
+    $project->refresh();
+    expect((float) $project->progress_percent)->toBe(45.5);
+    expect($project->status)->toBe('active');
+});
+

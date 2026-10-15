@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreProjectRequest;
 use App\Http\Requests\UpdateProjectRequest;
 use App\Models\Branch;
+use App\Models\ClientBill;
 use App\Models\Project;
 use App\Models\User;
 use App\Services\TenantManager;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -37,6 +39,16 @@ class ProjectController extends Controller
             ->latest()
             ->paginate(10)
             ->withQueryString();
+
+        $projects->getCollection()->transform(function ($project) {
+            $certifiedBilled = (float) ClientBill::where('project_id', $project->id)
+                ->whereIn('status', ['certified', 'paid'])
+                ->sum('gross_amount');
+            $project->billed_progress = (float) $project->contract_value > 0
+                ? min(100, round(($certifiedBilled / (float) $project->contract_value) * 100, 1))
+                : 0.0;
+            return $project;
+        });
 
         $branches = Branch::where('is_active', true)->get();
 
@@ -125,7 +137,7 @@ class ProjectController extends Controller
             ->with('success', __('erp.messages.deleted_successfully'));
     }
 
-    public function updateProgress(Request $request, Project $project): RedirectResponse
+    public function updateProgress(Request $request, Project $project): RedirectResponse|JsonResponse
     {
         $this->authorize('project.edit');
 
@@ -143,6 +155,18 @@ class ProjectController extends Controller
 
         $project->update($data);
 
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => "Progress updated to {$project->progress_percent}%",
+                'progress_percent' => (float) $project->progress_percent,
+                'formatted_progress' => number_format($project->progress_percent, 1),
+                'status' => $project->status,
+                'status_label' => __('erp.status.' . $project->status),
+            ]);
+        }
+
         return back()->with('success', "Progress for {$project->name} updated to {$project->progress_percent}%.");
     }
 }
+
