@@ -57,3 +57,102 @@ test('user without permission cannot create project', function () {
 
     $response->assertForbidden();
 });
+
+test('authorized user can add a branch and see it in projects create dropdown', function () {
+    $company = Company::where('code', 'HTP-CON')->first();
+    $superadmin = User::where('email', 'superadmin@htech.com.bd')->first();
+
+    // 1. Create a branch via POST /branches
+    $branchResponse = $this->actingAs($superadmin)
+        ->withSession(['active_company_id' => $company->id])
+        ->post(route('branches.store'), [
+            'code' => 'BRN-CTG-001',
+            'name' => 'Chittagong Port Regional Office',
+            'city' => 'Chittagong',
+            'division' => 'Chittagong',
+            'is_active' => true,
+        ]);
+
+    $branchResponse->assertRedirect(route('branches.index'));
+
+    // 2. Open /projects/create and verify branch is present in dropdown
+    $createResponse = $this->actingAs($superadmin)
+        ->withSession(['active_company_id' => $company->id])
+        ->get(route('projects.create'));
+
+    $createResponse->assertOk();
+    $createResponse->assertSee('Chittagong Port Regional Office');
+});
+
+test('authorized user can add a project manager and see them in projects create dropdown', function () {
+    $company = Company::where('code', 'HTP-CON')->first();
+    $superadmin = User::where('email', 'superadmin@htech.com.bd')->first();
+
+    // 1. Create a new user with role 'Project Manager'
+    $userResponse = $this->actingAs($superadmin)
+        ->withSession(['active_company_id' => $company->id])
+        ->post(route('users.store'), [
+            'name' => 'Engr. Mahbubul Alam',
+            'email' => 'mahbubul.pm@htech.com.bd',
+            'phone' => '+8801711223344',
+            'designation' => 'Lead Civil Project Manager',
+            'role' => 'Project Manager',
+            'password' => 'secret123',
+            'is_active' => true,
+        ]);
+
+    $userResponse->assertRedirect(route('users.index'));
+
+    $newUser = User::where('email', 'mahbubul.pm@htech.com.bd')->first();
+    expect($newUser)->not->toBeNull();
+    expect($newUser->hasRole('Project Manager'))->toBeTrue();
+
+    // 2. Open /projects/create and verify project manager is present in dropdown
+    $createResponse = $this->actingAs($superadmin)
+        ->withSession(['active_company_id' => $company->id])
+        ->get(route('projects.create'));
+
+    $createResponse->assertOk();
+    $createResponse->assertSee('Engr. Mahbubul Alam');
+    $createResponse->assertSee('Lead Civil Project Manager');
+});
+
+test('quick add ajax endpoints for branch and manager return json', function () {
+    $company = Company::where('code', 'HTP-CON')->first();
+    $superadmin = User::where('email', 'superadmin@htech.com.bd')->first();
+
+    // Branch AJAX
+    $branchAjax = $this->actingAs($superadmin)
+        ->withSession(['active_company_id' => $company->id])
+        ->postJson(route('branches.store'), [
+            'code' => 'BRN-SYL-001',
+            'name' => 'Sylhet Tea Estate Office',
+            'city' => 'Sylhet',
+            'is_active' => true,
+        ]);
+
+    $branchAjax->assertOk();
+    $branchAjax->assertJsonFragment([
+        'success' => true,
+        'name' => 'Sylhet Tea Estate Office',
+    ]);
+
+    // Project Manager AJAX
+    $managerAjax = $this->actingAs($superadmin)
+        ->withSession(['active_company_id' => $company->id])
+        ->postJson(route('users.store'), [
+            'name' => 'Engr. Farhana Yasmin',
+            'email' => 'farhana.pm@htech.com.bd',
+            'role' => 'Project Manager',
+            'designation' => 'Senior Project Director',
+            'is_active' => true,
+        ]);
+
+    $managerAjax->assertOk();
+    $managerAjax->assertJsonFragment([
+        'success' => true,
+        'name' => 'Engr. Farhana Yasmin',
+        'role' => 'Project Manager',
+    ]);
+});
+

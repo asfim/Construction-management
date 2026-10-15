@@ -21,15 +21,19 @@ class BudgetController extends Controller
             ->first();
 
         if (! $budget) {
-            $budget = Budget::create([
-                'company_id' => $tenantManager->currentCompanyId(),
-                'project_id' => $project->id,
-                'budget_code' => "BDG-{$project->code}",
-                'title' => "Master Project Cost Control Budget for {$project->name}",
-                'total_budget_amount' => $project->budget_amount,
-                'status' => 'draft',
-                'created_by' => auth()->id(),
-            ]);
+            $budget = Budget::firstOrCreate(
+                ['project_id' => $project->id],
+                [
+                    'company_id' => $project->company_id ?? $tenantManager->currentCompanyId(),
+                    'budget_code' => "BDG-{$project->code}",
+                    'title' => "Master Project Cost Control Budget for {$project->name}",
+                    'total_budget_amount' => $project->budget_amount ?? 0,
+                    'status' => 'draft',
+                    'created_by' => auth()->id(),
+                ]
+            );
+
+            $budget->load(['lines.costCode', 'creator', 'approver', 'boqVersion']);
         }
 
         $costCodes = CostCode::where('is_active', true)->get();

@@ -138,3 +138,59 @@ test('budget line calculates cost variance correctly', function () {
     $expectedVariance = (float) ($line->planned_amount - $line->actual_amount);
     expect($line->variance)->toBe($expectedVariance);
 });
+
+test('user can view project budget even when another project is active in session', function () {
+    $superadmin = User::where('email', 'superadmin@htech.com.bd')->first();
+    $project1 = Project::where('code', 'PRJ-GLS-001')->first();
+    $project3 = Project::where('code', 'PRJ-UTR-003')->first();
+
+    // User is active on Project 3, but navigates to Project 1's budget
+    $response = $this->actingAs($superadmin)
+        ->withSession([
+            'active_company_id' => $project1->company_id,
+            'active_project_id' => $project3->id,
+        ])
+        ->get(route('projects.budget.show', $project1));
+
+    $response->assertOk();
+    $response->assertViewIs('budgets.show');
+    $response->assertSee($project1->code);
+
+    // Repeated request should not fail with duplicate key constraint
+    $secondResponse = $this->actingAs($superadmin)
+        ->withSession([
+            'active_company_id' => $project1->company_id,
+            'active_project_id' => $project3->id,
+        ])
+        ->get(route('projects.budget.show', $project1));
+
+    $secondResponse->assertOk();
+});
+
+test('viewing budget for project without existing budget auto-creates baseline safely', function () {
+    $superadmin = User::where('email', 'superadmin@htech.com.bd')->first();
+    $company = Company::where('code', 'HTP-CON')->first();
+
+    $newProject = Project::create([
+        'company_id' => $company->id,
+        'code' => 'PRJ-TEST-AUTO',
+        'name' => 'Auto Budget Test Project',
+        'status' => 'planning',
+        'budget_amount' => 5000000.00,
+        'contract_value' => 6000000.00,
+        'created_by' => $superadmin->id,
+    ]);
+
+    $response = $this->actingAs($superadmin)
+        ->withSession(['active_company_id' => $company->id])
+        ->get(route('projects.budget.show', $newProject));
+
+    $response->assertOk();
+    $response->assertViewIs('budgets.show');
+
+    $budget = Budget::where('project_id', $newProject->id)->first();
+    expect($budget)->not->toBeNull();
+    expect($budget->budget_code)->toBe('BDG-PRJ-TEST-AUTO');
+    expect((float) $budget->total_budget_amount)->toBe(5000000.00);
+});
+

@@ -4,7 +4,6 @@ namespace App\Models;
 
 use App\Models\Traits\Auditable;
 use App\Models\Traits\BelongsToCompany;
-use App\Models\Traits\BelongsToProject;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -14,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class BoqVersion extends Model
 {
-    use HasFactory, BelongsToCompany, BelongsToProject, Auditable;
+    use HasFactory, BelongsToCompany, Auditable;
 
     protected $fillable = [
         'company_id',
@@ -38,6 +37,11 @@ class BoqVersion extends Model
             'version_number' => 'integer',
             'approved_at' => 'datetime',
         ];
+    }
+
+    public function project(): BelongsTo
+    {
+        return $this->belongsTo(Project::class);
     }
 
     public function items(): HasMany

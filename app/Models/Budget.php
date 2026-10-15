@@ -4,7 +4,6 @@ namespace App\Models;
 
 use App\Models\Traits\Auditable;
 use App\Models\Traits\BelongsToCompany;
-use App\Models\Traits\BelongsToProject;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Budget extends Model
 {
-    use HasFactory, BelongsToCompany, BelongsToProject, Auditable;
+    use HasFactory, BelongsToCompany, Auditable;
 
     protected $fillable = [
         'company_id',
@@ -46,6 +45,16 @@ class Budget extends Model
     public function boqVersion(): BelongsTo
     {
         return $this->belongsTo(BoqVersion::class);
+    }
+
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function approver(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'approved_by');
     }
 
     public function lines(): HasMany

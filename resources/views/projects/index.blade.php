@@ -90,13 +90,24 @@
                         <td class="fw-semibold text-muted">
                             ৳ {{ number_format($project->budget_amount, 2) }}
                         </td>
-                        <td style="min-width: 120px;">
+                        <td style="min-width: 130px;">
+                            @can('project.edit')
+                            <button type="button" class="btn btn-link p-0 text-decoration-none w-100 text-start" data-bs-toggle="modal" data-bs-target="#updateProgressModal{{ $project->id }}" title="Click to update progress">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="progress flex-grow-1" style="height: 7px; cursor: pointer;">
+                                        <div class="progress-bar bg-primary" role="progressbar" style="width: {{ $project->progress_percent }}%;"></div>
+                                    </div>
+                                    <small class="text-primary fw-bold text-nowrap">{{ number_format($project->progress_percent, 1) }}% <i class="bi bi-pencil" style="font-size: 0.65rem;"></i></small>
+                                </div>
+                            </button>
+                            @else
                             <div class="d-flex align-items-center gap-2">
                                 <div class="progress flex-grow-1" style="height: 6px;">
                                     <div class="progress-bar bg-primary" role="progressbar" style="width: {{ $project->progress_percent }}%;"></div>
                                 </div>
                                 <small class="text-muted fw-semibold">{{ number_format($project->progress_percent, 1) }}%</small>
                             </div>
+                            @endcan
                         </td>
                         <td>
                             <span class="badge badge-status badge-{{ $project->status }}">
@@ -115,6 +126,11 @@
                                         </a>
                                     </li>
                                     @can('project.edit')
+                                    <li>
+                                        <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#updateProgressModal{{ $project->id }}">
+                                            <i class="bi bi-speedometer2 text-info me-2"></i> Update Progress (%)
+                                        </button>
+                                    </li>
                                     <li>
                                         <a class="dropdown-item" href="{{ route('projects.edit', $project) }}">
                                             <i class="bi bi-pencil-square text-warning me-2"></i> {{ __('erp.actions.edit') }}
@@ -155,4 +171,98 @@
     </div>
     @endif
 </div>
+
+<!-- Modals: Update Progress for Projects -->
+@foreach($projects as $project)
+@can('project.edit')
+<div class="modal fade" id="updateProgressModal{{ $project->id }}" tabindex="-1" aria-labelledby="updateProgressModalLabel{{ $project->id }}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-light border-bottom py-3">
+                <div>
+                    <h6 class="modal-title fw-bold text-dark mb-0" id="updateProgressModalLabel{{ $project->id }}">
+                        <i class="bi bi-speedometer2 text-primary me-2"></i> Update Physical Progress
+                    </h6>
+                    <small class="text-muted">{{ $project->code }} — {{ $project->name }}</small>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ route('projects.progress.update', $project) }}" method="POST">
+                @csrf
+                @method('PATCH')
+                <div class="modal-body p-4">
+                    <div class="mb-4 text-center p-3 bg-light rounded-3">
+                        <span class="text-muted small d-block mb-1">Current Progress</span>
+                        <h2 class="fw-bold text-primary mb-0" id="progressDisplay{{ $project->id }}">{{ number_format($project->progress_percent, 1) }}%</h2>
+                        <div class="progress mt-2" style="height: 8px;">
+                            <div class="progress-bar bg-primary" id="progressBarDisplay{{ $project->id }}" role="progressbar" style="width: {{ $project->progress_percent }}%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Presets -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small mb-2 d-block">Quick Milestone Presets</label>
+                        <div class="btn-group w-100" role="group">
+                            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setProgressVal({{ $project->id }}, 25)">25%</button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setProgressVal({{ $project->id }}, 50)">50%</button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setProgressVal({{ $project->id }}, 75)">75%</button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setProgressVal({{ $project->id }}, 100)">100%</button>
+                        </div>
+                    </div>
+
+                    <!-- Slider & Number Input -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">New Progress Percentage (0 - 100) <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <input type="number" step="0.1" min="0" max="100" name="progress_percent" id="progressInput{{ $project->id }}"
+                                   class="form-control" value="{{ (float) $project->progress_percent }}" required
+                                   oninput="syncProgressDisplays({{ $project->id }}, this.value)">
+                            <span class="input-group-text fw-semibold">%</span>
+                        </div>
+                    </div>
+
+                    <!-- Status -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Project Status</label>
+                        <select name="status" class="form-select">
+                            <option value="planning" {{ $project->status === 'planning' ? 'selected' : '' }}>Planning</option>
+                            <option value="active" {{ $project->status === 'active' ? 'selected' : '' }}>Active</option>
+                            <option value="on_hold" {{ $project->status === 'on_hold' ? 'selected' : '' }}>On Hold</option>
+                            <option value="completed" {{ $project->status === 'completed' ? 'selected' : '' }}>Completed</option>
+                        </select>
+                        <small class="text-muted">Setting progress to 100% automatically changes status to Completed.</small>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light py-2">
+                    <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-sm btn-primary">
+                        <i class="bi bi-check-lg me-1"></i> Save Progress
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endcan
+@endforeach
+
+@push('scripts')
+<script>
+function setProgressVal(projectId, val) {
+    const input = document.getElementById('progressInput' + projectId);
+    if (input) {
+        input.value = val;
+        syncProgressDisplays(projectId, val);
+    }
+}
+
+function syncProgressDisplays(projectId, val) {
+    const display = document.getElementById('progressDisplay' + projectId);
+    const bar = document.getElementById('progressBarDisplay' + projectId);
+    const clampedVal = Math.max(0, Math.min(100, parseFloat(val) || 0));
+    if (display) display.textContent = clampedVal.toFixed(1) + '%';
+    if (bar) bar.style.width = clampedVal + '%';
+}
+</script>
+@endpush
 @endsection

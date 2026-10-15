@@ -49,8 +49,15 @@
                             <input type="text" name="name" class="form-control" value="{{ old('name', $project->name) }}" required>
                         </div>
                         <div class="col-12 col-md-6">
-                            <label class="form-label fw-semibold small">{{ __('erp.project.branch') }}</label>
-                            <select name="branch_id" class="form-select">
+                            <div class="d-flex align-items-center justify-content-between mb-1">
+                                <label class="form-label fw-semibold small mb-0">{{ __('erp.project.branch') }}</label>
+                                @can('branch.manage')
+                                <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none small text-primary" data-bs-toggle="modal" data-bs-target="#quickAddBranchModal">
+                                    <i class="bi bi-plus-circle me-1"></i> + New Branch
+                                </button>
+                                @endcan
+                            </div>
+                            <select name="branch_id" id="project_branch_id" class="form-select">
                                 <option value="">Select Branch</option>
                                 @foreach($branches as $branch)
                                 <option value="{{ $branch->id }}" {{ old('branch_id', $project->branch_id) == $branch->id ? 'selected' : '' }}>
@@ -60,8 +67,15 @@
                             </select>
                         </div>
                         <div class="col-12 col-md-6">
-                            <label class="form-label fw-semibold small">{{ __('erp.project.manager') }}</label>
-                            <select name="project_manager_id" class="form-select">
+                            <div class="d-flex align-items-center justify-content-between mb-1">
+                                <label class="form-label fw-semibold small mb-0">{{ __('erp.project.manager') }}</label>
+                                @can('user.manage')
+                                <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none small text-primary" data-bs-toggle="modal" data-bs-target="#quickAddManagerModal">
+                                    <i class="bi bi-person-plus me-1"></i> + New Manager
+                                </button>
+                                @endcan
+                            </div>
+                            <select name="project_manager_id" id="project_manager_id" class="form-select">
                                 <option value="">Select Project Manager</option>
                                 @foreach($managers as $manager)
                                 <option value="{{ $manager->id }}" {{ old('project_manager_id', $project->project_manager_id) == $manager->id ? 'selected' : '' }}>
@@ -225,4 +239,221 @@
         </div>
     </div>
 </form>
+
+<!-- Modal: Quick Add Branch -->
+<div class="modal fade" id="quickAddBranchModal" tabindex="-1" aria-labelledby="quickAddBranchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-light border-bottom py-3">
+                <h6 class="modal-title fw-bold text-dark" id="quickAddBranchModalLabel">
+                    <i class="bi bi-diagram-3 text-primary me-2"></i> Add New Associated Branch
+                </h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="quickAddBranchForm">
+                @csrf
+                <div class="modal-body p-4">
+                    <div id="quickBranchAlert" class="alert alert-danger d-none py-2 small"></div>
+                    <div class="row g-3">
+                        <div class="col-12 col-md-5">
+                            <label class="form-label fw-semibold small">Branch Code <span class="text-danger">*</span></label>
+                            <input type="text" name="code" class="form-control" placeholder="BRN-DHK-01" required value="BRN-{{ strtoupper(Str::random(4)) }}">
+                        </div>
+                        <div class="col-12 col-md-7">
+                            <label class="form-label fw-semibold small">Branch Name <span class="text-danger">*</span></label>
+                            <input type="text" name="name" class="form-control" placeholder="e.g. Dhaka Corporate Branch" required>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label fw-semibold small">City</label>
+                            <input type="text" name="city" class="form-control" placeholder="e.g. Dhaka">
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label fw-semibold small">Division</label>
+                            <input type="text" name="division" class="form-control" placeholder="e.g. Dhaka">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold small">Phone / Contact</label>
+                            <input type="text" name="phone" class="form-control" placeholder="+8801XXXXXXXXX">
+                        </div>
+                        <div class="col-12">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" name="is_head_office" id="branchHeadOffice" value="1">
+                                <label class="form-check-label small" for="branchHeadOffice">Head Office</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light py-2">
+                    <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-sm btn-primary" id="saveBranchBtn">
+                        <i class="bi bi-check-lg me-1"></i> Save & Select Branch
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Quick Add Project Manager -->
+<div class="modal fade" id="quickAddManagerModal" tabindex="-1" aria-labelledby="quickAddManagerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-light border-bottom py-3">
+                <h6 class="modal-title fw-bold text-dark" id="quickAddManagerModalLabel">
+                    <i class="bi bi-person-plus text-primary me-2"></i> Add New Project Manager
+                </h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="quickAddManagerForm">
+                @csrf
+                <input type="hidden" name="role" value="Project Manager">
+                <div class="modal-body p-4">
+                    <div id="quickManagerAlert" class="alert alert-danger d-none py-2 small"></div>
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label fw-semibold small">Full Name <span class="text-danger">*</span></label>
+                            <input type="text" name="name" class="form-control" placeholder="e.g. Engr. Shafiqul Islam" required>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold small">Email Address <span class="text-danger">*</span></label>
+                            <input type="email" name="email" class="form-control" placeholder="shafiqul@company.com" required>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label fw-semibold small">Phone Number</label>
+                            <input type="text" name="phone" class="form-control" placeholder="+88017XXXXXXXX">
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label fw-semibold small">Designation / Title</label>
+                            <input type="text" name="designation" class="form-control" placeholder="Project Manager" value="Project Manager">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold small">Initial Password (Optional)</label>
+                            <input type="password" name="password" class="form-control" placeholder="Default: password123">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light py-2">
+                    <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-sm btn-primary" id="saveManagerBtn">
+                        <i class="bi bi-check-lg me-1"></i> Save & Select Manager
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Quick Add Branch AJAX
+    const branchForm = document.getElementById('quickAddBranchForm');
+    if (branchForm) {
+        branchForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const btn = document.getElementById('saveBranchBtn');
+            const alertBox = document.getElementById('quickBranchAlert');
+            alertBox.classList.add('d-none');
+            alertBox.textContent = '';
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Saving...';
+
+            const formData = new FormData(branchForm);
+
+            fetch("{{ route('branches.store') }}", {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: formData
+            })
+            .then(res => res.json().then(data => ({ status: res.status, ok: res.ok, data })))
+            .then(result => {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-check-lg me-1"></i> Save & Select Branch';
+
+                if (!result.ok) {
+                    const errors = result.data.errors ? Object.values(result.data.errors).flat().join('<br>') : (result.data.message || 'Error creating branch.');
+                    alertBox.innerHTML = errors;
+                    alertBox.classList.remove('d-none');
+                    return;
+                }
+
+                const select = document.getElementById('project_branch_id');
+                const opt = document.createElement('option');
+                opt.value = result.data.branch.id;
+                opt.textContent = result.data.branch.name;
+                opt.selected = true;
+                select.appendChild(opt);
+
+                bootstrap.Modal.getInstance(document.getElementById('quickAddBranchModal')).hide();
+                branchForm.reset();
+            })
+            .catch(err => {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-check-lg me-1"></i> Save & Select Branch';
+                alertBox.textContent = 'Server error. Please try again.';
+                alertBox.classList.remove('d-none');
+            });
+        });
+    }
+
+    // Quick Add Project Manager AJAX
+    const managerForm = document.getElementById('quickAddManagerForm');
+    if (managerForm) {
+        managerForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const btn = document.getElementById('saveManagerBtn');
+            const alertBox = document.getElementById('quickManagerAlert');
+            alertBox.classList.add('d-none');
+            alertBox.textContent = '';
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Saving...';
+
+            const formData = new FormData(managerForm);
+
+            fetch("{{ route('users.store') }}", {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: formData
+            })
+            .then(res => res.json().then(data => ({ status: res.status, ok: res.ok, data })))
+            .then(result => {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-check-lg me-1"></i> Save & Select Manager';
+
+                if (!result.ok) {
+                    const errors = result.data.errors ? Object.values(result.data.errors).flat().join('<br>') : (result.data.message || 'Error creating project manager.');
+                    alertBox.innerHTML = errors;
+                    alertBox.classList.remove('d-none');
+                    return;
+                }
+
+                const select = document.getElementById('project_manager_id');
+                const opt = document.createElement('option');
+                opt.value = result.data.user.id;
+                opt.textContent = `${result.data.user.name} (${result.data.user.designation || 'Project Manager'})`;
+                opt.selected = true;
+                select.appendChild(opt);
+
+                bootstrap.Modal.getInstance(document.getElementById('quickAddManagerModal')).hide();
+                managerForm.reset();
+            })
+            .catch(err => {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-check-lg me-1"></i> Save & Select Manager';
+                alertBox.textContent = 'Server error. Please try again.';
+                alertBox.classList.remove('d-none');
+            });
+        });
+    }
+});
+</script>
+@endpush
 @endsection

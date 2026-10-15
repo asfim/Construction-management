@@ -572,6 +572,18 @@
                 <span>{{ __('erp.nav.new_project') }}</span>
             </a>
             @endcan
+            @can('branch.view')
+            <a href="{{ route('branches.index') }}" class="nav-item-link {{ request()->routeIs('branches.*') ? 'active' : '' }}">
+                <i class="bi bi-diagram-3"></i>
+                <span>Associated Branches</span>
+            </a>
+            @endcan
+            @can('user.view')
+            <a href="{{ route('users.index', ['role' => 'Project Manager']) }}" class="nav-item-link {{ request()->routeIs('users.*') ? 'active' : '' }}">
+                <i class="bi bi-person-badge"></i>
+                <span>Project Managers & Staff</span>
+            </a>
+            @endcan
 
             @if(isset($currentProject) && $currentProject)
             <div class="nav-category">Project Workspace ({{ Str::limit($currentProject->name, 16) }})</div>
@@ -676,6 +688,12 @@
             <a href="{{ route('branches.index') }}" class="nav-item-link {{ request()->routeIs('branches.*') ? 'active' : '' }}">
                 <i class="bi bi-diagram-3"></i>
                 <span>Branches</span>
+            </a>
+            @endcan
+            @can('user.view')
+            <a href="{{ route('users.index') }}" class="nav-item-link {{ request()->routeIs('users.*') ? 'active' : '' }}">
+                <i class="bi bi-people"></i>
+                <span>Users & Staff</span>
             </a>
             @endcan
             @can('audit.view')

@@ -124,4 +124,25 @@ class ProjectController extends Controller
         return redirect()->route('projects.index')
             ->with('success', __('erp.messages.deleted_successfully'));
     }
+
+    public function updateProgress(Request $request, Project $project): RedirectResponse
+    {
+        $this->authorize('project.edit');
+
+        $validated = $request->validate([
+            'progress_percent' => ['required', 'numeric', 'min:0', 'max:100'],
+            'status' => ['nullable', 'in:planning,active,on_hold,completed,archived'],
+        ]);
+
+        $data = ['progress_percent' => $validated['progress_percent']];
+        if (! empty($validated['status'])) {
+            $data['status'] = $validated['status'];
+        } elseif ((float) $validated['progress_percent'] >= 100 && $project->status !== 'completed') {
+            $data['status'] = 'completed';
+        }
+
+        $project->update($data);
+
+        return back()->with('success', "Progress for {$project->name} updated to {$project->progress_percent}%.");
+    }
 }

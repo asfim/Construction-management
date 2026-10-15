@@ -54,6 +54,22 @@ class TenantScopeMiddleware
                 $currentProjectId = null;
             }
 
+            // Sync active project if visiting a project-specific route
+            $routeProject = $request->route('project');
+            if ($routeProject) {
+                $targetProject = $routeProject instanceof Project ? $routeProject : Project::find($routeProject);
+                if ($targetProject && $this->tenantManager->userHasAccessToProject($user, $targetProject->id)) {
+                    if ($targetProject->company_id && $targetProject->company_id !== $currentCompanyId && $this->tenantManager->userHasAccessToCompany($user, $targetProject->company_id)) {
+                        $this->tenantManager->setCompany($targetProject->company_id);
+                        $currentCompanyId = $targetProject->company_id;
+                    }
+                    if ($currentProjectId !== $targetProject->id) {
+                        $this->tenantManager->setProject($targetProject->id);
+                        $currentProjectId = $targetProject->id;
+                    }
+                }
+            }
+
             // Available companies for user
             $userCompanies = $user->hasRole('Super Admin')
                 ? Company::where('is_active', true)->get()

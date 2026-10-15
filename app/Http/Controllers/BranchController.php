@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Branch;
 use App\Services\TenantManager;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -41,7 +42,7 @@ class BranchController extends Controller
         return view('branches.create');
     }
 
-    public function store(Request $request, TenantManager $tenantManager): RedirectResponse
+    public function store(Request $request, TenantManager $tenantManager): RedirectResponse|JsonResponse
     {
         $this->authorize('branch.manage');
 
@@ -63,7 +64,15 @@ class BranchController extends Controller
         $validated['is_head_office'] = $request->boolean('is_head_office');
         $validated['is_active'] = $request->boolean('is_active', true);
 
-        Branch::create($validated);
+        $branch = Branch::create($validated);
+
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Branch created successfully.',
+                'branch' => $branch,
+            ]);
+        }
 
         return redirect()->route('branches.index')
             ->with('success', 'Branch created successfully.');

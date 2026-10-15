@@ -23,6 +23,7 @@ use App\Http\Controllers\RateAnalysisController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\TenantSwitchController;
 use App\Http\Controllers\UnitController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\WarehouseController;
 use Illuminate\Support\Facades\Route;
 
@@ -43,9 +44,11 @@ Route::middleware(['auth'])->group(function () {
     // Dashboard
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
-    // Projects Master & Branches
+    // Projects Master, Branches & Users
+    Route::patch('projects/{project}/progress', [ProjectController::class, 'updateProgress'])->name('projects.progress.update');
     Route::resource('projects', ProjectController::class);
     Route::resource('branches', BranchController::class);
+    Route::resource('users', UserController::class);
 
     // Module 3: Materials, Categories, Units, Suppliers, Cost Codes
     Route::resource('items', ItemController::class);
