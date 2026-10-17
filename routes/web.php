@@ -62,7 +62,12 @@ Route::middleware(['auth'])->group(function () {
     Route::get('projects/{project}/boqs', [BoqController::class, 'index'])->name('projects.boqs.index');
     Route::post('projects/{project}/boqs', [BoqController::class, 'store'])->name('projects.boqs.store');
     Route::get('projects/{project}/boqs/{boq}', [BoqController::class, 'show'])->name('projects.boqs.show');
+    Route::put('projects/{project}/boqs/{boq}', [BoqController::class, 'update'])->name('projects.boqs.update');
+    Route::delete('projects/{project}/boqs/{boq}', [BoqController::class, 'destroy'])->name('projects.boqs.destroy');
+    Route::post('projects/{project}/boqs/{boq}/unlock', [BoqController::class, 'unlock'])->name('projects.boqs.unlock');
     Route::post('projects/{project}/boqs/{boq}/items', [BoqController::class, 'storeItem'])->name('projects.boqs.items.store');
+    Route::put('projects/{project}/boqs/{boq}/items/{item}', [BoqController::class, 'updateItem'])->name('projects.boqs.items.update');
+    Route::delete('projects/{project}/boqs/{boq}/items/{item}', [BoqController::class, 'destroyItem'])->name('projects.boqs.items.destroy');
     Route::post('projects/{project}/boqs/{boq}/revision', [BoqController::class, 'createRevision'])->name('projects.boqs.revision');
     Route::post('projects/{project}/boqs/{boq}/approve', [BoqController::class, 'approve'])->name('projects.boqs.approve');
 

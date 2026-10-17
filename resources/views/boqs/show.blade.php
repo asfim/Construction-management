@@ -42,6 +42,18 @@
             </form>
             @endcan
         @endif
+        @can('boq.manage')
+        @if(! $boq->is_locked || auth()->user()->hasRole(['Super Admin', 'Company Owner']))
+        <form action="{{ route('projects.boqs.destroy', [$project, $boq]) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete BOQ Version {{ $boq->version_number }} ({{ $boq->title }})? All line items and rate analyses will be permanently removed.');">
+            @csrf
+            @method('DELETE')
+            <button type="submit" class="btn btn-outline-danger d-flex align-items-center gap-1 shadow-sm">
+                <i class="bi bi-trash"></i>
+                <span>Delete Version</span>
+            </button>
+        </form>
+        @endif
+        @endcan
         <a href="{{ route('projects.boqs.index', $project) }}" class="btn btn-outline-secondary d-flex align-items-center gap-2">
             <i class="bi bi-arrow-left"></i>
             <span>Revisions List</span>
@@ -91,7 +103,7 @@
                         <th class="text-end">Planned Quantity</th>
                         <th class="text-end">Unit Rate (৳)</th>
                         <th class="text-end">Total Amount (৳)</th>
-                        <th class="text-center">Rate Analysis</th>
+                        <th class="text-center" style="width: 140px;">Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -121,9 +133,22 @@
                             ৳ {{ number_format($item->total_amount, 2) }}
                         </td>
                         <td class="text-center">
-                            <a href="{{ route('boq-items.rate-analysis', $item) }}" class="btn btn-sm btn-outline-primary py-1 px-2" title="View Rate Breakdown">
-                                <i class="bi bi-calculator me-1"></i> Analysis
-                            </a>
+                            <div class="d-flex align-items-center justify-content-center gap-1">
+                                <a href="{{ route('boq-items.rate-analysis', $item) }}" class="btn btn-sm btn-outline-primary py-1 px-2" title="View Rate Breakdown">
+                                    <i class="bi bi-calculator me-1"></i> Analysis
+                                </a>
+                                @if(! $boq->is_locked)
+                                @can('boq.manage')
+                                <form action="{{ route('projects.boqs.items.destroy', [$project, $boq, $item]) }}" method="POST" class="d-inline" onsubmit="return confirm('Delete line item {{ $item->item_code }}?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-sm btn-outline-danger py-1 px-2" title="Delete Item">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                                @endcan
+                                @endif
+                            </div>
                         </td>
                     </tr>
                     @empty

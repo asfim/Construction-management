@@ -67,12 +67,32 @@ class BoqController extends Controller
         return view('boqs.show', compact('project', 'boq', 'costCodes'));
     }
 
+    public function update(Request $request, Project $project, BoqVersion $boq): RedirectResponse
+    {
+        $this->authorize('boq.manage');
+
+        abort_if($boq->project_id !== $project->id, 404);
+
+        if ($boq->is_locked && ! auth()->user()->hasRole(['Super Admin', 'Company Owner'])) {
+            return back()->with('error', 'Cannot edit an approved and locked BOQ version. Unlock it first or create a revision.');
+        }
+
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'remarks' => 'nullable|string|max:1000',
+        ]);
+
+        $boq->update($validated);
+
+        return back()->with('success', "BOQ Version {$boq->version_number} details updated successfully.");
+    }
+
     public function storeItem(StoreBoqItemRequest $request, Project $project, BoqVersion $boq): RedirectResponse
     {
         abort_if($boq->project_id !== $project->id, 404);
 
-        if ($boq->is_locked) {
-            return back()->with('error', 'This BOQ version is approved and locked. To add items, create a new revision.');
+        if ($boq->is_locked && ! auth()->user()->hasRole(['Super Admin', 'Company Owner'])) {
+            return back()->with('error', 'This BOQ version is approved and locked. To add items, create a new revision or unlock it.');
         }
 
         $validated = $request->validated();
@@ -82,6 +102,20 @@ class BoqController extends Controller
         BoqItem::create($validated);
 
         return back()->with('success', __('erp.messages.created_successfully'));
+    }
+
+    public function updateItem(StoreBoqItemRequest $request, Project $project, BoqVersion $boq, BoqItem $item): RedirectResponse
+    {
+        abort_if($boq->project_id !== $project->id || $item->boq_version_id !== $boq->id, 404);
+
+        if ($boq->is_locked && ! auth()->user()->hasRole(['Super Admin', 'Company Owner'])) {
+            return back()->with('error', 'Cannot edit items on an approved and locked BOQ version. Unlock it first or create a revision.');
+        }
+
+        $validated = $request->validated();
+        $item->update($validated);
+
+        return back()->with('success', "Line item {$item->item_code} updated successfully.");
     }
 
     public function createRevision(Project $project, BoqVersion $boq, TenantManager $tenantManager): RedirectResponse
@@ -134,5 +168,73 @@ class BoqController extends Controller
         ]);
 
         return back()->with('success', 'BOQ version approved and baseline locked successfully.');
+    }
+
+    public function unlock(Project $project, BoqVersion $boq): RedirectResponse
+    {
+        $this->authorize('boq.approve');
+
+        abort_if($boq->project_id !== $project->id, 404);
+
+        if (! $boq->is_locked) {
+            return back()->with('info', 'This BOQ version is already in draft state.');
+        }
+
+        $hasBills = \App\Models\ClientBillItem::whereHas('boqItem', fn ($q) => $q->where('boq_version_id', $boq->id))->exists();
+        if ($hasBills && ! auth()->user()->hasRole(['Super Admin', 'Company Owner'])) {
+            return back()->with('error', 'Cannot unlock this BOQ version because some items are already referenced in certified Client Bills.');
+        }
+
+        $boq->update([
+            'status' => 'draft',
+            'is_locked' => false,
+            'approved_by' => null,
+            'approved_at' => null,
+        ]);
+
+        return back()->with('success', "BOQ Version {$boq->version_number} has been unlocked and reverted to draft for editing.");
+    }
+
+    public function destroy(Project $project, BoqVersion $boq): RedirectResponse
+    {
+        $this->authorize('boq.manage');
+
+        abort_if($boq->project_id !== $project->id, 404);
+
+        $hasBills = \App\Models\ClientBillItem::whereHas('boqItem', fn ($q) => $q->where('boq_version_id', $boq->id))->exists();
+        if ($hasBills) {
+            return back()->with('error', 'Cannot delete this BOQ version because some items are already referenced in Client RA Bills.');
+        }
+
+        if ($boq->is_locked && ! auth()->user()->hasRole(['Super Admin', 'Company Owner'])) {
+            return back()->with('error', 'Only Super Admin or Company Owner can delete an approved and locked baseline BOQ.');
+        }
+
+        $versionNumber = $boq->version_number;
+        $boq->delete();
+
+        return redirect()->route('projects.boqs.index', $project)
+            ->with('success', "BOQ Version {$versionNumber} has been deleted successfully.");
+    }
+
+    public function destroyItem(Project $project, BoqVersion $boq, BoqItem $item): RedirectResponse
+    {
+        $this->authorize('boq.manage');
+
+        abort_if($boq->project_id !== $project->id || $item->boq_version_id !== $boq->id, 404);
+
+        if ($boq->is_locked) {
+            return back()->with('error', 'Cannot delete items from an approved and locked BOQ version.');
+        }
+
+        $hasBills = \App\Models\ClientBillItem::where('boq_item_id', $item->id)->exists();
+        if ($hasBills) {
+            return back()->with('error', 'Cannot delete this item because it has been billed in Client RA Bills.');
+        }
+
+        $itemCode = $item->item_code;
+        $item->delete();
+
+        return back()->with('success', "Line item {$itemCode} deleted successfully.");
     }
 }

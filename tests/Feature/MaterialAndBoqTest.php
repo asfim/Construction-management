@@ -194,3 +194,64 @@ test('viewing budget for project without existing budget auto-creates baseline s
     expect((float) $budget->total_budget_amount)->toBe(5000000.00);
 });
 
+test('authorized user can delete a draft boq line item and recalculates boq total', function () {
+    $company = Company::where('code', 'HTP-CON')->first();
+    $project = Project::where('code', 'PRJ-GLS-001')->first();
+    $pm = User::where('email', 'pm@htech.com.bd')->first();
+
+    $draftBoq = BoqVersion::create([
+        'company_id' => $company->id,
+        'project_id' => $project->id,
+        'version_number' => 99,
+        'title' => 'Temporary Test BOQ',
+        'status' => 'draft',
+        'is_locked' => false,
+        'created_by' => $pm->id,
+        'total_amount' => 0,
+    ]);
+
+    $item1 = BoqItem::create([
+        'boq_version_id' => $draftBoq->id,
+        'project_id' => $project->id,
+        'item_code' => 'TEST-001',
+        'description' => 'Test Item 1',
+        'unit' => 'cft',
+        'planned_quantity' => 10,
+        'unit_rate' => 100,
+    ]);
+
+    $item2 = BoqItem::create([
+        'boq_version_id' => $draftBoq->id,
+        'project_id' => $project->id,
+        'item_code' => 'TEST-002',
+        'description' => 'Test Item 2',
+        'unit' => 'cft',
+        'planned_quantity' => 5,
+        'unit_rate' => 200,
+    ]);
+
+    $draftBoq->refresh();
+    expect((float) $draftBoq->total_amount)->toBe(2000.00);
+
+    // Delete item 1
+    $response = $this->actingAs($pm)
+        ->withSession(['active_company_id' => $company->id])
+        ->delete(route('projects.boqs.items.destroy', [$project, $draftBoq, $item1]));
+
+    $response->assertRedirect();
+    expect(BoqItem::find($item1->id))->toBeNull();
+
+    $draftBoq->refresh();
+    expect((float) $draftBoq->total_amount)->toBe(1000.00);
+
+    // Now delete the entire draft BOQ version
+    $delResponse = $this->actingAs($pm)
+        ->withSession(['active_company_id' => $company->id])
+        ->delete(route('projects.boqs.destroy', [$project, $draftBoq]));
+
+    $delResponse->assertRedirect(route('projects.boqs.index', $project));
+    expect(BoqVersion::find($draftBoq->id))->toBeNull();
+    expect(BoqItem::find($item2->id))->toBeNull(); // cascading delete
+});
+
+

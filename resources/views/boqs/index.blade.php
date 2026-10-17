@@ -75,9 +75,22 @@
                             @endif
                         </td>
                         <td class="text-end">
-                            <a href="{{ route('projects.boqs.show', [$project, $ver]) }}" class="btn btn-sm btn-primary">
-                                <i class="bi bi-table me-1"></i> Open BOQ
-                            </a>
+                            <div class="d-flex align-items-center justify-content-end gap-1">
+                                <a href="{{ route('projects.boqs.show', [$project, $ver]) }}" class="btn btn-sm btn-primary">
+                                    <i class="bi bi-table me-1"></i> Open BOQ
+                                </a>
+                                @can('boq.manage')
+                                @if(! $ver->is_locked || auth()->user()->hasRole(['Super Admin', 'Company Owner']))
+                                <form action="{{ route('projects.boqs.destroy', [$project, $ver]) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete BOQ Version {{ $ver->version_number }} ({{ $ver->title }})? All line items and rate analyses under this version will be removed permanently.');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete BOQ Version">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                                @endif
+                                @endcan
+                            </div>
                         </td>
                     </tr>
                     @empty
