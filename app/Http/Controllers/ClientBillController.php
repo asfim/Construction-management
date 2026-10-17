@@ -40,17 +40,27 @@ class ClientBillController extends Controller
         $activeProjectId = $tenantManager->currentProjectId();
 
         $projects = Project::where('company_id', $companyId)
-            ->where('status', 'active')
+            ->whereIn('status', ['active', 'in_progress', 'planning'])
             ->get();
 
         $selectedProjectId = $request->integer('project_id') ?: $activeProjectId ?: $projects->first()?->id;
-        $project = $projects->firstWhere('id', $selectedProjectId);
+        $project = $projects->firstWhere('id', $selectedProjectId) ?? Project::find($selectedProjectId);
 
+        // Fetch latest active/approved BOQ Version
+        $boqVersion = null;
         $boqItems = collect();
         if ($project) {
-            $boqItems = BoqItem::whereHas('boqVersion', function ($q) use ($project) {
-                $q->where('project_id', $project->id);
-            })->with('costCode')->get();
+            $boqVersion = \App\Models\BoqVersion::where('project_id', $project->id)
+                ->where('is_locked', true)
+                ->orderByDesc('version_number')
+                ->first()
+                ?? \App\Models\BoqVersion::where('project_id', $project->id)
+                    ->orderByDesc('version_number')
+                    ->first();
+
+            if ($boqVersion) {
+                $boqItems = $boqVersion->items()->with('costCode')->get();
+            }
         }
 
         // Calculate previously billed quantities for each BOQ item
@@ -66,18 +76,37 @@ class ClientBillController extends Controller
             }
         }
 
-        $nextBillNumber = 'RA-' . sprintf('%02d', ClientBill::where('company_id', $companyId)->where('project_id', $selectedProjectId)->count() + 1);
+        // Compute next available bill number for this project (e.g. RA-01, RA-02)
+        $nextNum = 1;
+        if ($project) {
+            $existingBillCount = ClientBill::where('company_id', $companyId)->where('project_id', $project->id)->count();
+            $nextNum = $existingBillCount + 1;
+            while (ClientBill::where('company_id', $companyId)->where('project_id', $project->id)->where('bill_number', 'RA-' . sprintf('%02d', $nextNum))->exists()) {
+                $nextNum++;
+            }
+        }
+        $nextBillNumber = 'RA-' . sprintf('%02d', $nextNum);
 
-        return view('client-bills.create', compact('projects', 'project', 'selectedProjectId', 'boqItems', 'previousQuantities', 'nextBillNumber'));
+        return view('client-bills.create', compact('projects', 'project', 'selectedProjectId', 'boqVersion', 'boqItems', 'previousQuantities', 'nextBillNumber'));
     }
 
     public function store(Request $request, TenantManager $tenantManager): RedirectResponse
     {
         $this->authorize('bill.create');
 
+        $companyId = $tenantManager->currentCompanyId();
+        $projectId = $request->input('project_id');
+
         $validated = $request->validate([
             'project_id' => 'required|exists:projects,id',
-            'bill_number' => 'required|string|max:50',
+            'bill_number' => [
+                'required',
+                'string',
+                'max:50',
+                \Illuminate\Validation\Rule::unique('client_bills', 'bill_number')
+                    ->where('company_id', $companyId)
+                    ->where('project_id', $projectId),
+            ],
             'bill_date' => 'required|date',
             'period_start' => 'required|date',
             'period_end' => 'required|date|after_or_equal:period_start',
@@ -93,12 +122,16 @@ class ClientBillController extends Controller
             'items.*.remarks' => 'nullable|string|max:255',
         ]);
 
-        $companyId = $tenantManager->currentCompanyId();
         $grossAmount = 0;
-
         foreach ($validated['items'] as $itemData) {
             $currentAmount = (float) $itemData['current_quantity'] * (float) $itemData['unit_rate'];
             $grossAmount += $currentAmount;
+        }
+
+        if ($grossAmount <= 0) {
+            return back()->withInput()->withErrors([
+                'items' => 'Please enter a current measured quantity greater than 0 for at least one BOQ item.',
+            ]);
         }
 
         $advanceRecoveryAmount = round($grossAmount * ($validated['advance_recovery_percentage'] / 100), 2);

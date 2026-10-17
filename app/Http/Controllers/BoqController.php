@@ -73,10 +73,6 @@ class BoqController extends Controller
 
         abort_if($boq->project_id !== $project->id, 404);
 
-        if ($boq->is_locked && ! auth()->user()->hasRole(['Super Admin', 'Company Owner'])) {
-            return back()->with('error', 'Cannot edit an approved and locked BOQ version. Unlock it first or create a revision.');
-        }
-
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'remarks' => 'nullable|string|max:1000',
@@ -91,8 +87,8 @@ class BoqController extends Controller
     {
         abort_if($boq->project_id !== $project->id, 404);
 
-        if ($boq->is_locked && ! auth()->user()->hasRole(['Super Admin', 'Company Owner'])) {
-            return back()->with('error', 'This BOQ version is approved and locked. To add items, create a new revision or unlock it.');
+        if ($boq->is_locked) {
+            return back()->with('error', 'This BOQ version is approved and locked. To add items, create a new revision.');
         }
 
         $validated = $request->validated();
@@ -108,8 +104,11 @@ class BoqController extends Controller
     {
         abort_if($boq->project_id !== $project->id || $item->boq_version_id !== $boq->id, 404);
 
-        if ($boq->is_locked && ! auth()->user()->hasRole(['Super Admin', 'Company Owner'])) {
-            return back()->with('error', 'Cannot edit items on an approved and locked BOQ version. Unlock it first or create a revision.');
+        if ($boq->is_locked) {
+            $hasBills = \App\Models\ClientBillItem::where('boq_item_id', $item->id)->exists();
+            if ($hasBills && ! auth()->user()->hasRole(['Super Admin', 'Company Owner'])) {
+                return back()->with('error', 'Cannot edit this line item because it has already been certified in Client RA Bills.');
+            }
         }
 
         $validated = $request->validated();

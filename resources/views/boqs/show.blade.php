@@ -32,6 +32,15 @@
             </form>
             @endcan
         @else
+            @can('boq.approve')
+            <form action="{{ route('projects.boqs.unlock', [$project, $boq]) }}" method="POST" class="d-inline" onsubmit="return confirm('Unlock this BOQ version to allow editing line items, adding new items, and adjusting quantities?');">
+                @csrf
+                <button type="submit" class="btn btn-outline-warning text-dark d-flex align-items-center gap-2 shadow-sm">
+                    <i class="bi bi-unlock"></i>
+                    <span>Unlock / Edit</span>
+                </button>
+            </form>
+            @endcan
             @can('boq.manage')
             <form action="{{ route('projects.boqs.revision', [$project, $boq]) }}" method="POST" onsubmit="return confirm('Create a new revision variation while preserving this locked baseline?');">
                 @csrf
@@ -43,6 +52,10 @@
             @endcan
         @endif
         @can('boq.manage')
+        <button type="button" class="btn btn-outline-primary d-flex align-items-center gap-1 shadow-sm" data-bs-toggle="modal" data-bs-target="#editBoqModal">
+            <i class="bi bi-pencil-square"></i>
+            <span>Edit Version</span>
+        </button>
         @if(! $boq->is_locked || auth()->user()->hasRole(['Super Admin', 'Company Owner']))
         <form action="{{ route('projects.boqs.destroy', [$project, $boq]) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete BOQ Version {{ $boq->version_number }} ({{ $boq->title }})? All line items and rate analyses will be permanently removed.');">
             @csrf
@@ -85,11 +98,11 @@
         <h6 class="fw-bold mb-0 text-dark">
             <i class="bi bi-list-check text-primary me-2"></i> BOQ Line Items Specification
         </h6>
-        @if(! $boq->is_locked)
+        @can('boq.manage')
         <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addItemModal">
             <i class="bi bi-plus-lg me-1"></i> Add Line Item
         </button>
-        @endif
+        @endcan
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
@@ -137,8 +150,22 @@
                                 <a href="{{ route('boq-items.rate-analysis', $item) }}" class="btn btn-sm btn-outline-primary py-1 px-2" title="View Rate Breakdown">
                                     <i class="bi bi-calculator me-1"></i> Analysis
                                 </a>
-                                @if(! $boq->is_locked)
                                 @can('boq.manage')
+                                <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2 btn-edit-item"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#editItemModal"
+                                    data-id="{{ $item->id }}"
+                                    data-code="{{ $item->item_code }}"
+                                    data-cost-code="{{ $item->cost_code_id }}"
+                                    data-unit="{{ $item->unit }}"
+                                    data-description="{{ $item->description }}"
+                                    data-quantity="{{ $item->planned_quantity }}"
+                                    data-rate="{{ $item->unit_rate }}"
+                                    data-action="{{ route('projects.boqs.items.update', [$project, $boq, $item]) }}"
+                                    title="Edit Line Item">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                @if(! $boq->is_locked || auth()->user()->hasRole(['Super Admin', 'Company Owner']))
                                 <form action="{{ route('projects.boqs.items.destroy', [$project, $boq, $item]) }}" method="POST" class="d-inline" onsubmit="return confirm('Delete line item {{ $item->item_code }}?');">
                                     @csrf
                                     @method('DELETE')
@@ -146,8 +173,8 @@
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </form>
-                                @endcan
                                 @endif
+                                @endcan
                             </div>
                         </td>
                     </tr>
@@ -172,9 +199,11 @@
         </div>
     </div>
 </div>
+@endsection
 
-<!-- Modal: Add Item to Unlocked BOQ -->
-@if(! $boq->is_locked)
+@push('modals')
+<!-- Modal: Add Item to BOQ -->
+@can('boq.manage')
 <div class="modal fade" id="addItemModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -225,5 +254,128 @@
         </div>
     </div>
 </div>
-@endif
-@endsection
+@endcan
+
+<!-- Modal: Edit BOQ Version -->
+@can('boq.manage')
+<div class="modal fade" id="editBoqModal" tabindex="-1" aria-labelledby="editBoqModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-light border-bottom py-3">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="p-1 px-2 rounded bg-primary text-white">
+                        <i class="bi bi-pencil-square"></i>
+                    </span>
+                    <h6 class="modal-title fw-bold text-dark mb-0" id="editBoqModalLabel">
+                        Edit BOQ Version {{ $boq->version_number }} Details
+                    </h6>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ route('projects.boqs.update', [$project, $boq]) }}" method="POST">
+                @csrf
+                @method('PUT')
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Version Title <span class="text-danger">*</span></label>
+                        <input type="text" name="title" class="form-control" value="{{ old('title', $boq->title) }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Scope / Remarks</label>
+                        <textarea name="remarks" class="form-control" rows="3">{{ old('remarks', $boq->remarks) }}</textarea>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light py-2">
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-sm btn-primary px-3 fw-bold">
+                        <i class="bi bi-check2-circle me-1"></i> Update Version
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Edit Line Item -->
+<div class="modal fade" id="editItemModal" tabindex="-1" aria-labelledby="editItemModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content border-0 shadow-lg">
+            <form id="editItemForm" method="POST">
+                @csrf
+                @method('PUT')
+                <div class="modal-header bg-light border-bottom py-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="p-1 px-2 rounded bg-primary text-white">
+                            <i class="bi bi-pencil-square"></i>
+                        </span>
+                        <h6 class="modal-title fw-bold text-dark mb-0" id="editItemModalLabel">Edit BOQ Line Item</h6>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="row g-3">
+                        <div class="col-12 col-md-4">
+                            <label class="form-label fw-semibold small">Item Code <span class="text-danger">*</span></label>
+                            <input type="text" name="item_code" id="edit_item_code" class="form-control" required>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label class="form-label fw-semibold small">Cost Code</label>
+                            <select name="cost_code_id" id="edit_cost_code_id" class="form-select">
+                                <option value="">Select Cost Code</option>
+                                @foreach($costCodes as $cc)
+                                <option value="{{ $cc->id }}">{{ $cc->code }} — {{ $cc->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label class="form-label fw-semibold small">Unit of Measure <span class="text-danger">*</span></label>
+                            <input type="text" name="unit" id="edit_unit" class="form-control" required>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold small">Full Description of Work <span class="text-danger">*</span></label>
+                            <textarea name="description" id="edit_description" class="form-control" rows="3" required></textarea>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label fw-semibold small">Planned Quantity <span class="text-danger">*</span></label>
+                            <input type="number" step="0.0001" name="planned_quantity" id="edit_planned_quantity" class="form-control" required>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label fw-semibold small">Unit Rate (৳) <span class="text-danger">*</span></label>
+                            <input type="number" step="0.01" name="unit_rate" id="edit_unit_rate" class="form-control" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light py-2">
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-sm btn-primary px-3 fw-bold">
+                        <i class="bi bi-check2-circle me-1"></i> Update Item
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endcan
+@endpush
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const editModalEl = document.getElementById('editItemModal');
+    if (!editModalEl) return;
+
+    editModalEl.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget;
+        if (!button) return;
+
+        document.getElementById('editItemForm').action = button.dataset.action || '';
+        document.getElementById('edit_item_code').value = button.dataset.code || '';
+        document.getElementById('edit_cost_code_id').value = button.dataset.costCode || '';
+        document.getElementById('edit_unit').value = button.dataset.unit || '';
+        document.getElementById('edit_description').value = button.dataset.description || '';
+        document.getElementById('edit_planned_quantity').value = button.dataset.quantity || '';
+        document.getElementById('edit_unit_rate').value = button.dataset.rate || '';
+    });
+});
+</script>
+@endpush

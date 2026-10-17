@@ -254,4 +254,83 @@ test('authorized user can delete a draft boq line item and recalculates boq tota
     expect(BoqItem::find($item2->id))->toBeNull(); // cascading delete
 });
 
+test('authorized user can update boq version details and line items, and unlock locked boq', function () {
+    $company = Company::where('code', 'HTP-CON')->first();
+    $project = Project::where('code', 'PRJ-GLS-001')->first();
+    $pm = User::where('email', 'pm@htech.com.bd')->first();
+
+    $boq = BoqVersion::create([
+        'company_id' => $company->id,
+        'project_id' => $project->id,
+        'version_number' => 88,
+        'title' => 'Initial Title',
+        'status' => 'draft',
+        'is_locked' => false,
+        'created_by' => $pm->id,
+        'total_amount' => 0,
+    ]);
+
+    // 1. Update BOQ Version
+    $response = $this->actingAs($pm)
+        ->withSession(['active_company_id' => $company->id])
+        ->put(route('projects.boqs.update', [$project, $boq]), [
+            'title' => 'Updated Title Milestone',
+            'remarks' => 'Updated remarks',
+        ]);
+
+    $response->assertRedirect();
+    $boq->refresh();
+    expect($boq->title)->toBe('Updated Title Milestone');
+    expect($boq->remarks)->toBe('Updated remarks');
+
+    // 2. Create and update line item
+    $item = BoqItem::create([
+        'boq_version_id' => $boq->id,
+        'project_id' => $project->id,
+        'item_code' => 'CIV-001',
+        'description' => 'Original Description',
+        'unit' => 'cft',
+        'planned_quantity' => 10,
+        'unit_rate' => 50,
+    ]);
+
+    $boq->refresh();
+    expect((float) $boq->total_amount)->toBe(500.00);
+
+    $updateItemRes = $this->actingAs($pm)
+        ->withSession(['active_company_id' => $company->id])
+        ->put(route('projects.boqs.items.update', [$project, $boq, $item]), [
+            'item_code' => 'CIV-001-MOD',
+            'description' => 'Updated Description',
+            'unit' => 'cum',
+            'planned_quantity' => 20,
+            'unit_rate' => 100,
+        ]);
+
+    $updateItemRes->assertRedirect();
+    $item->refresh();
+    expect($item->item_code)->toBe('CIV-001-MOD');
+    expect($item->unit)->toBe('cum');
+    expect((float) $item->planned_quantity)->toBe(20.0000);
+    expect((float) $item->unit_rate)->toBe(100.00);
+    expect((float) $item->total_amount)->toBe(2000.00);
+
+    $boq->refresh();
+    expect((float) $boq->total_amount)->toBe(2000.00);
+
+    // 3. Lock it
+    $boq->update(['is_locked' => true, 'status' => 'approved']);
+
+    // 4. Unlock it
+    $unlockRes = $this->actingAs($pm)
+        ->withSession(['active_company_id' => $company->id])
+        ->post(route('projects.boqs.unlock', [$project, $boq]));
+
+    $unlockRes->assertRedirect();
+    $boq->refresh();
+    expect($boq->is_locked)->toBeFalse();
+    expect($boq->status)->toBe('draft');
+});
+
+
 

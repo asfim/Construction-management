@@ -80,6 +80,16 @@
                                     <i class="bi bi-table me-1"></i> Open BOQ
                                 </a>
                                 @can('boq.manage')
+                                <button type="button" class="btn btn-sm btn-outline-secondary btn-edit-ver"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#editBoqIndexModal"
+                                    data-version="{{ $ver->version_number }}"
+                                    data-title="{{ $ver->title }}"
+                                    data-remarks="{{ $ver->remarks }}"
+                                    data-action="{{ route('projects.boqs.update', [$project, $ver]) }}"
+                                    title="Edit BOQ Version Details">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
                                 @if(! $ver->is_locked || auth()->user()->hasRole(['Super Admin', 'Company Owner']))
                                 <form action="{{ route('projects.boqs.destroy', [$project, $ver]) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete BOQ Version {{ $ver->version_number }} ({{ $ver->title }})? All line items and rate analyses under this version will be removed permanently.');">
                                     @csrf
@@ -155,6 +165,67 @@
         </div>
     </div>
 </div>
+@can('boq.manage')
+<div class="modal fade" id="editBoqIndexModal" tabindex="-1" aria-labelledby="editBoqIndexModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-light border-bottom py-3">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="p-1 px-2 rounded bg-primary text-white">
+                        <i class="bi bi-pencil-square"></i>
+                    </span>
+                    <h6 class="modal-title fw-bold text-dark mb-0" id="editBoqIndexModalLabel">
+                        Edit BOQ Version Details
+                    </h6>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="editBoqIndexForm" method="POST">
+                @csrf
+                @method('PUT')
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Version Title <span class="text-danger">*</span></label>
+                        <input type="text" name="title" id="edit_ver_title" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Scope / Remarks</label>
+                        <textarea name="remarks" id="edit_ver_remarks" class="form-control" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light py-2">
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-sm btn-primary px-3 fw-bold">
+                        <i class="bi bi-check2-circle me-1"></i> Update Version
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endcan
 @endcanany
+@endpush
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const modalEl = document.getElementById('editBoqIndexModal');
+    if (!modalEl) return;
+
+    modalEl.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget;
+        if (!button) return;
+
+        document.getElementById('editBoqIndexForm').action = button.dataset.action || '';
+        document.getElementById('edit_ver_title').value = button.dataset.title || '';
+        document.getElementById('edit_ver_remarks').value = button.dataset.remarks || '';
+        const titleEl = document.getElementById('editBoqIndexModalLabel');
+        if (titleEl) {
+            titleEl.textContent = 'Edit BOQ Version ' + (button.dataset.version || '') + ' Details';
+        }
+    });
+});
+</script>
 @endpush
 @endsection
