@@ -93,7 +93,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('inventory/issues', [InventoryLedgerController::class, 'storeIssue'])->name('inventory.issues.store');
 
     // Module 8: Daily Progress Reports (DPR)
-    Route::resource('daily-progress-reports', DailyProgressReportController::class)->names('dpr');
+    Route::resource('daily-progress-reports', DailyProgressReportController::class)
+        ->parameters(['daily-progress-reports' => 'dpr'])
+        ->names('dpr');
     Route::post('daily-progress-reports/{dpr}/approve', [DailyProgressReportController::class, 'approve'])->name('dpr.approve');
 
     // Module 9: Measurement & Client Billing (RA Bills)

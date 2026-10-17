@@ -28,6 +28,17 @@ trait BelongsToProject
     }
 
     /**
+     * Resolve the route binding without restricting by active session project scope,
+     * while preserving multi-tenant company isolation.
+     */
+    public function resolveRouteBinding($value, $field = null)
+    {
+        return $this->withoutGlobalScope(ProjectScope::class)
+            ->where($field ?? $this->getRouteKeyName(), $value)
+            ->first();
+    }
+
+    /**
      * Relationship to Project.
      */
     public function project(): BelongsTo

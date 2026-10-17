@@ -44,6 +44,14 @@ test('site engineer can submit DPR and project manager can approve it', function
     expect($dpr->total_workers)->toBe(30);
     expect($dpr->status)->toBe('submitted');
 
+    // Site engineer can view DPR details page
+    $showResponse = $this->actingAs($siteEngineer)
+        ->withSession(['active_company_id' => $company->id])
+        ->get(route('dpr.show', $dpr));
+    $showResponse->assertOk();
+    $showResponse->assertSee($dpr->dpr_number);
+    $showResponse->assertSee($dpr->report_date->format('d M, Y'));
+
     // PM approves the DPR
     $approveResponse = $this->actingAs($pm)
         ->withSession(['active_company_id' => $company->id])

@@ -97,9 +97,21 @@
                             @endif
                         </td>
                         <td class="text-end">
-                            <a href="{{ route('dpr.show', $report) }}" class="btn btn-sm btn-outline-primary">
-                                <i class="bi bi-eye"></i> Details
-                            </a>
+                            <div class="d-flex align-items-center justify-content-end gap-1">
+                                <a href="{{ route('dpr.show', $report) }}" class="btn btn-sm btn-outline-primary text-nowrap" title="View details">
+                                    <i class="bi bi-eye"></i> Details
+                                </a>
+                                @can('dpr.approve')
+                                @if($report->status !== 'approved')
+                                <form action="{{ route('dpr.approve', $report) }}" method="POST" class="d-inline" onsubmit="return confirm('Approve Daily Progress Report {{ $report->dpr_number }}?');">
+                                    @csrf
+                                    <button type="submit" class="btn btn-sm btn-success text-nowrap shadow-sm" title="Approve DPR">
+                                        <i class="bi bi-check2-circle me-1"></i> Approve
+                                    </button>
+                                </form>
+                                @endif
+                                @endcan
+                            </div>
                         </td>
                     </tr>
                     @empty

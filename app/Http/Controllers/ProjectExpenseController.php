@@ -48,7 +48,19 @@ class ProjectExpenseController extends Controller
 
         $projects = Project::where('company_id', $companyId)->where('status', 'active')->get();
         $costCodes = CostCode::where('company_id', $companyId)->where('is_active', true)->get();
-        $nextVoucherNo = 'EXP-' . date('Ymd') . '-' . sprintf('%03d', ProjectExpense::where('company_id', $companyId)->whereDate('created_at', today())->count() + 1);
+        $existingVouchers = ProjectExpense::withoutGlobalScopes()
+            ->where('company_id', $companyId)
+            ->where('voucher_number', 'LIKE', 'EXP-' . date('Ymd') . '-%')
+            ->pluck('voucher_number')
+            ->toArray();
+        $maxVoucherSeq = 0;
+        foreach ($existingVouchers as $num) {
+            if (preg_match('/EXP-\d+-(\d+)/', $num, $matches)) {
+                $seq = (int) $matches[1];
+                if ($seq > $maxVoucherSeq) $maxVoucherSeq = $seq;
+            }
+        }
+        $nextVoucherNo = sprintf('EXP-%s-%03d', date('Ymd'), $maxVoucherSeq + 1);
 
         return view('project-expenses.create', compact('projects', 'costCodes', 'activeProjectId', 'nextVoucherNo'));
     }

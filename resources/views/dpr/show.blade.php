@@ -17,7 +17,7 @@
             </span>
             @endif
         </div>
-        <h4 class="fw-bold mb-1 text-dark">Daily Progress Report: {{ $dpr->report_date->format('d M, Y') }}</h4>
+        <h4 class="fw-bold mb-1 text-dark">Daily Progress Report: {{ $dpr->report_date?->format('d M, Y') ?? 'N/A' }}</h4>
         <p class="text-muted small mb-0">{{ $dpr->project?->name }} ({{ $dpr->project?->code }})</p>
     </div>
     <div class="d-flex align-items-center gap-2">
@@ -52,7 +52,7 @@
         <div class="card card-custom p-3 border-0 shadow-sm h-100">
             <span class="text-muted small fw-semibold d-block mb-1">Weather Condition</span>
             <h4 class="fw-bold text-primary mb-0"><i class="bi bi-cloud-sun me-1"></i> {{ $dpr->weather }}</h4>
-            <small class="text-muted">{{ $dpr->report_date->format('l, d-m-Y') }}</small>
+            <small class="text-muted">{{ $dpr->report_date?->format('l, d-m-Y') ?? 'N/A' }}</small>
         </div>
     </div>
     <div class="col-12 col-sm-6 col-xl-3">
