@@ -113,7 +113,7 @@ class RoleAndPermissionSeeder extends Seeder
         $mdRole = Role::findByName('Managing Director', 'web');
         $mdRole->givePermissionTo([
             'company.view', 'branch.view', 'branch.manage', 'user.view', 'user.manage', 'project.view', 'project.create', 'project.edit', 'project.assign',
-            'boq.view', 'boq.approve', 'budget.view', 'budget.approve', 'mr.view', 'mr.approve',
+            'boq.view', 'boq.manage', 'boq.approve', 'budget.view', 'budget.approve', 'mr.view', 'mr.approve',
             'po.view', 'po.approve', 'grn.view', 'warehouse.view', 'warehouse.manage', 'stock.view', 'dpr.view', 'dpr.approve', 'mb.view', 'bill.view',
             'bill.certify', 'account.view', 'journal.view', 'tax.view', 'audit.view', 'report.view', 'report.export',
         ]);

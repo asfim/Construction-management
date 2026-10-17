@@ -13,6 +13,12 @@
         <p class="text-muted small mb-0">{{ $project->name }}</p>
     </div>
     <div class="d-flex align-items-center gap-2">
+        @canany(['boq.manage', 'boq.approve'])
+        <button type="button" class="btn btn-primary d-flex align-items-center gap-2 shadow-sm" data-bs-toggle="modal" data-bs-target="#createBoqModal">
+            <i class="bi bi-plus-lg"></i>
+            <span>{{ $boqVersions->isEmpty() ? 'Initialize Project BOQ' : 'New BOQ Version' }}</span>
+        </button>
+        @endcanany
         <a href="{{ route('projects.show', $project) }}" class="btn btn-outline-secondary d-flex align-items-center gap-2">
             <i class="bi bi-arrow-left"></i>
             <span>Back to Project</span>
@@ -77,7 +83,14 @@
                     @empty
                     <tr>
                         <td colspan="7" class="text-center py-5 text-muted">
-                            No BOQ records found for this project.
+                            <i class="bi bi-file-earmark-spreadsheet fs-1 text-secondary d-block mb-3"></i>
+                            <h5 class="fw-bold text-dark mb-1">No BOQ records found for this project</h5>
+                            <p class="text-muted small mb-3">Start by initializing Version 1 (Baseline Contract Estimation) to add line items and rates.</p>
+                            @canany(['boq.manage', 'boq.approve'])
+                            <button type="button" class="btn btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#createBoqModal">
+                                <i class="bi bi-plus-circle me-1"></i> Initialize Project BOQ (Version 1)
+                            </button>
+                            @endcanany
                         </td>
                     </tr>
                     @endforelse
@@ -86,4 +99,49 @@
         </div>
     </div>
 </div>
+
+@push('modals')
+@canany(['boq.manage', 'boq.approve'])
+<div class="modal fade" id="createBoqModal" tabindex="-1" aria-labelledby="createBoqModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-light border-bottom py-3">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="p-1 px-2 rounded bg-primary text-white">
+                        <i class="bi bi-file-earmark-plus"></i>
+                    </span>
+                    <h6 class="modal-title fw-bold text-dark mb-0" id="createBoqModalLabel">
+                        {{ $boqVersions->isEmpty() ? 'Initialize Baseline BOQ' : 'Create New BOQ Version' }}
+                    </h6>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ route('projects.boqs.store', $project) }}" method="POST">
+                @csrf
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Version Title <span class="text-danger">*</span></label>
+                        <input type="text" name="title" class="form-control"
+                               placeholder="e.g. Original Approved Baseline BOQ"
+                               value="{{ old('title', $boqVersions->isEmpty() ? 'Original Approved Baseline BOQ' : 'BOQ Version ' . ($boqVersions->max('version_number') + 1)) }}"
+                               required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Scope / Remarks</label>
+                        <textarea name="remarks" class="form-control" rows="3"
+                                  placeholder="Describe the scope, tender package, or estimation baseline notes...">{{ old('remarks', $boqVersions->isEmpty() ? 'Initial approved contract baseline estimation and specifications.' : '') }}</textarea>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light py-2">
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-sm btn-primary px-3 fw-bold">
+                        <i class="bi bi-check2-circle me-1"></i> Create & Start Adding Items
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endcanany
+@endpush
 @endsection

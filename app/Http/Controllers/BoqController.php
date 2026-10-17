@@ -27,6 +27,34 @@ class BoqController extends Controller
         return view('boqs.index', compact('project', 'boqVersions'));
     }
 
+    public function store(Request $request, Project $project, TenantManager $tenantManager): RedirectResponse
+    {
+        $this->authorize('boq.manage');
+
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'remarks' => 'nullable|string|max:500',
+        ]);
+
+        $latestVersionNumber = BoqVersion::where('project_id', $project->id)->max('version_number') ?? 0;
+        $newVersionNumber = $latestVersionNumber + 1;
+
+        $boq = BoqVersion::create([
+            'company_id' => $project->company_id,
+            'project_id' => $project->id,
+            'version_number' => $newVersionNumber,
+            'title' => $validated['title'],
+            'remarks' => $validated['remarks'] ?? ($newVersionNumber === 1 ? 'Initial project estimation baseline' : null),
+            'total_amount' => 0,
+            'status' => 'draft',
+            'is_locked' => false,
+            'created_by' => auth()->id(),
+        ]);
+
+        return redirect()->route('projects.boqs.show', [$project, $boq])
+            ->with('success', "BOQ Version {$newVersionNumber} created successfully. You can now add work items.");
+    }
+
     public function show(Project $project, BoqVersion $boq): View
     {
         $this->authorize('boq.view');

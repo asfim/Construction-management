@@ -60,6 +60,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Module 4: BOQ, Rate Analysis, Project Budgets
     Route::get('projects/{project}/boqs', [BoqController::class, 'index'])->name('projects.boqs.index');
+    Route::post('projects/{project}/boqs', [BoqController::class, 'store'])->name('projects.boqs.store');
     Route::get('projects/{project}/boqs/{boq}', [BoqController::class, 'show'])->name('projects.boqs.show');
     Route::post('projects/{project}/boqs/{boq}/items', [BoqController::class, 'storeItem'])->name('projects.boqs.items.store');
     Route::post('projects/{project}/boqs/{boq}/revision', [BoqController::class, 'createRevision'])->name('projects.boqs.revision');
