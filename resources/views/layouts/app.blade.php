@@ -319,8 +319,16 @@
         .tenant-select { border-radius: 10px; background-color: #f8fafc; border-color: var(--border-soft); }
 
         /* ---------- Page entrance ---------- */
-        .content-body { animation: pageIn .45s cubic-bezier(.2,.7,.2,1) both; }
-        @keyframes pageIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+        .content-body { animation: pageIn .3s ease-out; }
+        @keyframes pageIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Ensure Bootstrap modals always stack above modal-backdrop */
+        .modal {
+            z-index: 1060 !important;
+        }
+        .modal-backdrop {
+            z-index: 1050 !important;
+        }
 
         /* ---------- Headings ---------- */
         .content-body h4.fw-bold, .content-body h3.fw-bold {
@@ -830,11 +838,28 @@
         </footer>
     </div>
 
+    @stack('modals')
+
     <!-- Bootstrap 5.3 Bundle JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.getElementById('sidebarToggle')?.addEventListener('click', function() {
             document.getElementById('sidebarMenu')?.classList.toggle('show');
+        });
+
+        // Ensure all Bootstrap modals are appended directly to body to prevent stacking context or backdrop occlusion issues
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.modal').forEach(function (modal) {
+                if (modal.parentElement !== document.body) {
+                    document.body.appendChild(modal);
+                }
+            });
+        });
+
+        document.addEventListener('show.bs.modal', function (event) {
+            if (event.target && event.target.parentElement !== document.body) {
+                document.body.appendChild(event.target);
+            }
         });
     </script>
     @stack('scripts')

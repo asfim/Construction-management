@@ -172,6 +172,7 @@
     @endif
 </div>
 
+@push('modals')
 <!-- Modals: Update Progress for Projects -->
 @foreach($projects as $project)
 @can('project.edit')
@@ -268,6 +269,7 @@
 </div>
 @endcan
 @endforeach
+@endpush
 
 @push('scripts')
 <script>
