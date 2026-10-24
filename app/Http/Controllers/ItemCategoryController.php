@@ -16,9 +16,22 @@ class ItemCategoryController extends Controller
 
         $companyId = $tenantManager->currentCompanyId();
         $search = $request->string('search')->trim();
+        $type = $request->string('type', 'all')->trim()->value();
+        $parentId = $request->integer('parent_id') ?: null;
 
-        $categories = ItemCategory::query()
-            ->when($companyId, fn ($q) => $q->where('company_id', $companyId))
+        $baseQuery = ItemCategory::query()
+            ->when($companyId, fn ($q) => $q->where('company_id', $companyId));
+
+        $counts = [
+            'all' => (clone $baseQuery)->count(),
+            'parent' => (clone $baseQuery)->whereNull('parent_id')->count(),
+            'sub' => (clone $baseQuery)->whereNotNull('parent_id')->count(),
+        ];
+
+        $categories = (clone $baseQuery)
+            ->when($type === 'parent', fn ($q) => $q->whereNull('parent_id'))
+            ->when($type === 'sub', fn ($q) => $q->whereNotNull('parent_id'))
+            ->when($parentId, fn ($q) => $q->where('parent_id', $parentId))
             ->when($search->isNotEmpty(), function ($q) use ($search) {
                 $q->where(function ($sub) use ($search) {
                     $sub->where('name', 'like', "%{$search}%")
@@ -26,23 +39,34 @@ class ItemCategoryController extends Controller
                         ->orWhere('code', 'like', "%{$search}%");
                 });
             })
-            ->with(['parent', 'items'])
-            ->withCount('items')
+            ->with(['parent', 'children', 'items'])
+            ->withCount(['items', 'children'])
             ->latest()
             ->paginate(15)
             ->withQueryString();
 
-        return view('item-categories.index', compact('categories', 'search'));
+        $parentCategories = ItemCategory::where('company_id', $companyId)
+            ->whereNull('parent_id')
+            ->where('is_active', true)
+            ->get();
+
+        return view('item-categories.index', compact('categories', 'search', 'type', 'parentId', 'counts', 'parentCategories'));
     }
 
-    public function create(TenantManager $tenantManager): View
+    public function create(Request $request, TenantManager $tenantManager): View
     {
         $this->authorize('item.manage');
 
         $companyId = $tenantManager->currentCompanyId();
-        $parentCategories = ItemCategory::where('company_id', $companyId)->where('is_active', true)->get();
+        $parentCategories = ItemCategory::where('company_id', $companyId)
+            ->whereNull('parent_id')
+            ->where('is_active', true)
+            ->get();
 
-        return view('item-categories.create', compact('parentCategories'));
+        $selectedParentId = $request->integer('parent_id') ?: null;
+        $defaultType = $request->get('type', $selectedParentId ? 'sub' : 'parent');
+
+        return view('item-categories.create', compact('parentCategories', 'selectedParentId', 'defaultType'));
     }
 
     public function store(Request $request, TenantManager $tenantManager): RedirectResponse
@@ -56,12 +80,18 @@ class ItemCategoryController extends Controller
             'name' => ['required', 'string', 'max:100'],
             'name_bn' => ['nullable', 'string', 'max:100'],
             'description' => ['nullable', 'string'],
+            'category_type' => ['nullable', 'string', 'in:parent,sub'],
             'parent_id' => ['nullable', 'exists:item_categories,id'],
             'is_active' => ['boolean'],
         ]);
 
         $validated['company_id'] = $companyId;
         $validated['is_active'] = $request->boolean('is_active', true);
+
+        // If explicitly set as a Main/Parent Category, parent_id is always null
+        if (($request->input('category_type') === 'parent') || empty($validated['parent_id'])) {
+            $validated['parent_id'] = null;
+        }
 
         ItemCategory::create($validated);
 
@@ -76,10 +106,13 @@ class ItemCategoryController extends Controller
         $companyId = $tenantManager->currentCompanyId();
         $parentCategories = ItemCategory::where('company_id', $companyId)
             ->where('id', '!=', $itemCategory->id)
+            ->whereNull('parent_id')
             ->where('is_active', true)
             ->get();
 
-        return view('item-categories.edit', compact('itemCategory', 'parentCategories'));
+        $currentType = $itemCategory->parent_id ? 'sub' : 'parent';
+
+        return view('item-categories.edit', compact('itemCategory', 'parentCategories', 'currentType'));
     }
 
     public function update(Request $request, ItemCategory $itemCategory): RedirectResponse
@@ -91,11 +124,17 @@ class ItemCategoryController extends Controller
             'name' => ['required', 'string', 'max:100'],
             'name_bn' => ['nullable', 'string', 'max:100'],
             'description' => ['nullable', 'string'],
+            'category_type' => ['nullable', 'string', 'in:parent,sub'],
             'parent_id' => ['nullable', 'exists:item_categories,id'],
             'is_active' => ['boolean'],
         ]);
 
         $validated['is_active'] = $request->boolean('is_active');
+
+        // If explicitly set as a Main/Parent Category, parent_id is always null
+        if (($request->input('category_type') === 'parent') || empty($validated['parent_id'])) {
+            $validated['parent_id'] = null;
+        }
 
         $itemCategory->update($validated);
 

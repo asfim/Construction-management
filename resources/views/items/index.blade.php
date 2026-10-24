@@ -62,6 +62,7 @@
                         <th>Standard Rate</th>
                         <th>Min Stock Alert</th>
                         <th>Status</th>
+                        <th class="text-end pe-3">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -98,10 +99,26 @@
                             <span class="badge bg-danger-subtle text-danger">Inactive</span>
                             @endif
                         </td>
+                        <td class="text-end pe-3">
+                            <div class="d-flex align-items-center justify-content-end gap-1">
+                                @can('item.manage')
+                                <a href="{{ route('items.edit', $item) }}" class="btn btn-sm btn-outline-primary" title="Edit Material">
+                                    <i class="bi bi-pencil me-1"></i> Edit
+                                </a>
+                                <form action="{{ route('items.destroy', $item) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete material \'{{ addslashes($item->name) }}\'?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete Material">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                                @endcan
+                            </div>
+                        </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" class="text-center py-5 text-muted">
+                        <td colspan="8" class="text-center py-5 text-muted">
                             No materials found.
                         </td>
                     </tr>

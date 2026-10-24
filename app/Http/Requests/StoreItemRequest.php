@@ -23,6 +23,7 @@ class StoreItemRequest extends FormRequest
             'brand' => ['nullable', 'string', 'max:100'],
             'standard_rate' => ['required', 'numeric', 'min:0'],
             'min_stock_alert' => ['nullable', 'numeric', 'min:0'],
+            'is_active' => ['nullable', 'boolean'],
         ];
     }
 }

@@ -37,6 +37,49 @@ test('procurement manager can create and edit item category', function () {
     expect($category->fresh()->name)->toBe('Electrical & Substation Equipments');
 });
 
+test('procurement manager can create parent category and subcategory linked to parent', function () {
+    $procurement = User::where('email', 'procurement@htech.com.bd')->first();
+
+    // 1. Create a Parent Category
+    $parentRes = $this->actingAs($procurement)->post(route('item-categories.store'), [
+        'code' => 'CAT-HVAC-MAIN',
+        'name' => 'HVAC & Mechanical',
+        'category_type' => 'parent',
+        'is_active' => true,
+    ]);
+    $parentRes->assertRedirect(route('item-categories.index'));
+
+    $parentCat = ItemCategory::where('code', 'CAT-HVAC-MAIN')->first();
+    expect($parentCat)->not->toBeNull();
+    expect($parentCat->parent_id)->toBeNull();
+
+    // 2. Create a Subcategory linked to the Parent
+    $subRes = $this->actingAs($procurement)->post(route('item-categories.store'), [
+        'code' => 'CAT-HVAC-DUCT',
+        'name' => 'GI Air Ducts & Dampers',
+        'category_type' => 'sub',
+        'parent_id' => $parentCat->id,
+        'is_active' => true,
+    ]);
+    $subRes->assertRedirect(route('item-categories.index'));
+
+    $subCat = ItemCategory::where('code', 'CAT-HVAC-DUCT')->first();
+    expect($subCat)->not->toBeNull();
+    expect($subCat->parent_id)->toBe($parentCat->id);
+    expect($parentCat->children()->count())->toBe(1);
+
+    // 3. Test filter tabs on index
+    $indexParent = $this->actingAs($procurement)->get(route('item-categories.index', ['type' => 'parent']));
+    $indexParent->assertOk();
+    $indexParent->assertSee('CAT-HVAC-MAIN');
+    $indexParent->assertDontSee('CAT-HVAC-DUCT');
+
+    $indexSub = $this->actingAs($procurement)->get(route('item-categories.index', ['type' => 'sub']));
+    $indexSub->assertOk();
+    $indexSub->assertSee('CAT-HVAC-DUCT');
+    $indexSub->assertSee('Subcategory');
+});
+
 test('authorized manager can create and edit unit of measurement', function () {
     $procurement = User::where('email', 'procurement@htech.com.bd')->first();
 

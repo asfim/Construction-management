@@ -36,6 +36,44 @@ test('authorized procurement user can create an item with decimal precision', fu
     expect((string) $item->standard_rate)->toBe('102500.50');
 });
 
+test('authorized procurement user can edit and delete a material item', function () {
+    $company = Company::where('code', 'HTP-CON')->first();
+    $procurement = User::where('email', 'procurement@htech.com.bd')->first();
+    $item = Item::first();
+
+    // 1. Can view edit page
+    $editRes = $this->actingAs($procurement)
+        ->withSession(['active_company_id' => $company->id])
+        ->get(route('items.edit', $item));
+    $editRes->assertOk();
+    $editRes->assertSee($item->code);
+
+    // 2. Can update item
+    $updateRes = $this->actingAs($procurement)
+        ->withSession(['active_company_id' => $company->id])
+        ->put(route('items.update', $item), [
+            'code' => $item->code,
+            'name' => 'Updated Material Name',
+            'unit_id' => $item->unit_id,
+            'standard_rate' => 999.00,
+            'min_stock_alert' => 5.0,
+            'is_active' => true,
+        ]);
+    $updateRes->assertRedirect(route('items.index'));
+
+    $item->refresh();
+    expect($item->name)->toBe('Updated Material Name');
+
+    // 3. Can delete item
+    $delRes = $this->actingAs($procurement)
+        ->withSession(['active_company_id' => $company->id])
+        ->delete(route('items.destroy', $item));
+    $delRes->assertRedirect(route('items.index'));
+
+    expect(Item::find($item->id))->toBeNull(); // soft deleted
+    expect(Item::withTrashed()->find($item->id))->not->toBeNull();
+});
+
 test('authorized user can register a supplier with credit terms', function () {
     $company = Company::where('code', 'HTP-CON')->first();
     $procurement = User::where('email', 'procurement@htech.com.bd')->first();
