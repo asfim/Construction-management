@@ -26,7 +26,7 @@
                             <select name="project_id" class="form-select @error('project_id') is-invalid @enderror" required>
                                 <option value="">Select Project</option>
                                 @foreach($projects as $project)
-                                    <option value="{{ $project->id }}" {{ old('project_id') == $project->id ? 'selected' : '' }}>
+                                    <option value="{{ $project->id }}" {{ old('project_id', $currentProjectId) == $project->id ? 'selected' : '' }}>
                                         {{ $project->name }} ({{ $project->code }})
                                     </option>
                                 @endforeach

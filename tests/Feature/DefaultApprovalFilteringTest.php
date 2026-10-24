@@ -289,3 +289,37 @@ test('client bills index defaults to uncertified bills and respects status filte
     $resApproved->assertSee('RA-FILTER-CERTIFIED-01');
     $resApproved->assertDontSee('RA-FILTER-SUBMITTED-01');
 });
+
+test('newly created material requisition is immediately visible on index without approval', function () {
+    $company = Company::where('code', 'HTP-CON')->first();
+    $pm = User::where('email', 'pm@htech.com.bd')->first();
+    $project = Project::first();
+    $item = Item::first();
+
+    // Store a new MR
+    $storeRes = $this->actingAs($pm)
+        ->withSession(['active_company_id' => $company->id])
+        ->post(route('material-requisitions.store'), [
+            'project_id' => $project->id,
+            'requisition_no' => 'MR-IMMEDIATE-001',
+            'requisition_date' => now()->toDateString(),
+            'items' => [
+                [
+                    'item_id' => $item->id,
+                    'quantity_requested' => 5,
+                ],
+            ],
+        ]);
+
+    $storeRes->assertRedirect();
+
+    // Now visit index without any approval
+    $indexRes = $this->actingAs($pm)
+        ->withSession(['active_company_id' => $company->id])
+        ->get(route('material-requisitions.index', ['status' => 'unapproved']));
+
+    $indexRes->assertOk();
+    $indexRes->assertSee('MR-IMMEDIATE-001');
+    $indexRes->assertSee('Submitted');
+});
+

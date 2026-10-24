@@ -19,7 +19,14 @@ class GoodsReceiptController extends Controller
         $this->authorize('grn.view');
 
         $companyId = $tenantManager->currentCompanyId();
-        $projectId = $tenantManager->currentProjectId();
+        
+        if ($request->has('project_id')) {
+            $selectedProj = $request->get('project_id');
+            $projectId = ($selectedProj === 'all' || empty($selectedProj)) ? null : (int) $selectedProj;
+        } else {
+            $projectId = $tenantManager->currentProjectId();
+        }
+
         $status = $request->string('status')->trim()->value();
 
         // Default to unapproved (draft inspection pending) if no status was specified
@@ -27,7 +34,7 @@ class GoodsReceiptController extends Controller
             $status = 'unapproved';
         }
 
-        $baseQuery = GoodsReceipt::query()
+        $baseQuery = GoodsReceipt::withoutGlobalScope(\App\Models\Scopes\ProjectScope::class)
             ->when($companyId, fn ($q) => $q->where('company_id', $companyId))
             ->when($projectId, fn ($q) => $q->where('project_id', $projectId));
 
@@ -81,6 +88,10 @@ class GoodsReceiptController extends Controller
         $companyId = $tenantManager->currentCompanyId();
 
         $po = PurchaseOrder::findOrFail($validated['purchase_order_id']);
+
+        if (! empty($po->project_id)) {
+            $tenantManager->setProject($po->project_id);
+        }
 
         $grn = DB::transaction(function () use ($validated, $companyId, $po) {
             $grn = GoodsReceipt::create([

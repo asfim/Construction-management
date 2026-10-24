@@ -17,7 +17,14 @@ class DailyProgressReportController extends Controller
         $this->authorize('dpr.view');
 
         $companyId = $tenantManager->currentCompanyId();
-        $projectId = $tenantManager->currentProjectId();
+        
+        if ($request->has('project_id')) {
+            $selectedProj = $request->get('project_id');
+            $projectId = ($selectedProj === 'all' || empty($selectedProj)) ? null : (int) $selectedProj;
+        } else {
+            $projectId = $tenantManager->currentProjectId();
+        }
+
         $status = $request->string('status')->trim()->value();
 
         // Default to unapproved if no status was specified
@@ -25,7 +32,7 @@ class DailyProgressReportController extends Controller
             $status = 'unapproved';
         }
 
-        $baseQuery = DailyProgressReport::query()
+        $baseQuery = DailyProgressReport::withoutGlobalScope(\App\Models\Scopes\ProjectScope::class)
             ->when($companyId, fn ($q) => $q->where('company_id', $companyId))
             ->when($projectId, fn ($q) => $q->where('project_id', $projectId));
 
@@ -146,6 +153,10 @@ class DailyProgressReportController extends Controller
             $status = 'approved';
             $approvedBy = auth()->id();
             $approvedAt = now();
+        }
+
+        if (! empty($validated['project_id'])) {
+            $tenantManager->setProject($validated['project_id']);
         }
 
         $report = DailyProgressReport::create([

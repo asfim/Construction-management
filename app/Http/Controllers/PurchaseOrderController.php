@@ -21,7 +21,14 @@ class PurchaseOrderController extends Controller
         $this->authorize('po.view');
 
         $companyId = $tenantManager->currentCompanyId();
-        $projectId = $tenantManager->currentProjectId();
+        
+        if ($request->has('project_id')) {
+            $selectedProj = $request->get('project_id');
+            $projectId = ($selectedProj === 'all' || empty($selectedProj)) ? null : (int) $selectedProj;
+        } else {
+            $projectId = $tenantManager->currentProjectId();
+        }
+
         $status = $request->string('status')->trim()->value();
 
         // Default to unapproved (draft) if no status was specified
@@ -29,7 +36,7 @@ class PurchaseOrderController extends Controller
             $status = 'unapproved';
         }
 
-        $baseQuery = PurchaseOrder::query()
+        $baseQuery = PurchaseOrder::withoutGlobalScope(\App\Models\Scopes\ProjectScope::class)
             ->when($companyId, fn ($q) => $q->where('company_id', $companyId))
             ->when($projectId, fn ($q) => $q->where('project_id', $projectId));
 
@@ -72,6 +79,10 @@ class PurchaseOrderController extends Controller
     {
         $validated = $request->validated();
         $companyId = $tenantManager->currentCompanyId();
+
+        if (! empty($validated['project_id'])) {
+            $tenantManager->setProject($validated['project_id']);
+        }
 
         $po = DB::transaction(function () use ($validated, $companyId) {
             $subtotal = 0.00;

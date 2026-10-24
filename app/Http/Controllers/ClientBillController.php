@@ -17,7 +17,14 @@ class ClientBillController extends Controller
         $this->authorize('bill.view');
 
         $companyId = $tenantManager->currentCompanyId();
-        $projectId = $tenantManager->currentProjectId();
+        
+        if ($request->has('project_id')) {
+            $selectedProj = $request->get('project_id');
+            $projectId = ($selectedProj === 'all' || empty($selectedProj)) ? null : (int) $selectedProj;
+        } else {
+            $projectId = $tenantManager->currentProjectId();
+        }
+
         $status = $request->string('status')->trim()->value();
 
         // Default to uncertified (submitted) if no status was specified
@@ -25,7 +32,7 @@ class ClientBillController extends Controller
             $status = 'unapproved';
         }
 
-        $baseQuery = ClientBill::query()
+        $baseQuery = ClientBill::withoutGlobalScope(\App\Models\Scopes\ProjectScope::class)
             ->when($companyId, fn ($q) => $q->where('company_id', $companyId))
             ->when($projectId, fn ($q) => $q->where('project_id', $projectId));
 
@@ -155,6 +162,10 @@ class ClientBillController extends Controller
         $retentionAmount = round($grossAmount * ($validated['retention_percentage'] / 100), 2);
         $vatAmount = round($grossAmount * ($validated['vat_percentage'] / 100), 2);
         $netPayable = round($grossAmount - $advanceRecoveryAmount - $retentionAmount + $vatAmount, 2);
+
+        if (! empty($validated['project_id'])) {
+            $tenantManager->setProject($validated['project_id']);
+        }
 
         $bill = ClientBill::create([
             'company_id' => $companyId,

@@ -19,7 +19,14 @@ class MaterialRequisitionController extends Controller
         $this->authorize('mr.view');
 
         $companyId = $tenantManager->currentCompanyId();
-        $projectId = $tenantManager->currentProjectId();
+        
+        if ($request->has('project_id')) {
+            $selectedProj = $request->get('project_id');
+            $projectId = ($selectedProj === 'all' || empty($selectedProj)) ? null : (int) $selectedProj;
+        } else {
+            $projectId = $tenantManager->currentProjectId();
+        }
+
         $status = $request->string('status')->trim()->value();
 
         // Default to unapproved if no status filter was specified
@@ -27,7 +34,7 @@ class MaterialRequisitionController extends Controller
             $status = 'unapproved';
         }
 
-        $baseQuery = MaterialRequisition::query()
+        $baseQuery = MaterialRequisition::withoutGlobalScope(\App\Models\Scopes\ProjectScope::class)
             ->when($companyId, fn ($q) => $q->where('company_id', $companyId))
             ->when($projectId, fn ($q) => $q->where('project_id', $projectId));
 
@@ -46,7 +53,10 @@ class MaterialRequisitionController extends Controller
             ->paginate(15)
             ->withQueryString();
 
-        return view('material-requisitions.index', compact('requisitions', 'status', 'counts'));
+        $projects = Project::where('company_id', $companyId)->where('status', 'active')->get();
+        $currentProject = $projectId ? Project::find($projectId) : null;
+
+        return view('material-requisitions.index', compact('requisitions', 'status', 'counts', 'projects', 'projectId', 'currentProject'));
     }
 
     public function create(TenantManager $tenantManager): View
@@ -54,11 +64,12 @@ class MaterialRequisitionController extends Controller
         $this->authorize('mr.create');
 
         $companyId = $tenantManager->currentCompanyId();
+        $currentProjectId = $tenantManager->currentProjectId();
         $projects = Project::where('company_id', $companyId)->where('status', 'active')->get();
         $items = Item::where('company_id', $companyId)->where('is_active', true)->with('unit')->get();
         $costCodes = CostCode::where('company_id', $companyId)->where('is_active', true)->get();
 
-        return view('material-requisitions.create', compact('projects', 'items', 'costCodes'));
+        return view('material-requisitions.create', compact('projects', 'items', 'costCodes', 'currentProjectId'));
     }
 
     public function store(StoreMaterialRequisitionRequest $request, TenantManager $tenantManager): RedirectResponse
@@ -67,6 +78,10 @@ class MaterialRequisitionController extends Controller
         $validated['company_id'] = $tenantManager->currentCompanyId();
         $validated['submitted_by'] = auth()->id();
         $validated['status'] = 'submitted';
+
+        if (! empty($validated['project_id'])) {
+            $tenantManager->setProject($validated['project_id']);
+        }
 
         $mr = MaterialRequisition::create($validated);
 

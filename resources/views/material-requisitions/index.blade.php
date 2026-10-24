@@ -18,12 +18,12 @@
 
 <div class="card card-custom mb-4">
     <div class="card-body p-3">
-        <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+        <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3">
             <!-- Approval Workflow Tabs -->
-            <ul class="nav nav-pills gap-2">
+            <ul class="nav nav-pills gap-2 flex-wrap">
                 <li class="nav-item">
                     <a class="nav-link py-2 px-3 {{ $status === 'unapproved' ? 'active' : '' }}" 
-                       href="{{ route('material-requisitions.index', ['status' => 'unapproved']) }}">
+                       href="{{ route('material-requisitions.index', array_filter(['status' => 'unapproved', 'project_id' => request('project_id')])) }}">
                         <i class="bi bi-clock-history me-1"></i>
                         <span>Pending Approval</span>
                         <span class="badge {{ $status === 'unapproved' ? 'bg-white text-primary' : 'bg-warning-subtle text-warning-emphasis' }} ms-1 rounded-pill">
@@ -33,7 +33,7 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link py-2 px-3 {{ $status === 'approved' ? 'active' : '' }}" 
-                       href="{{ route('material-requisitions.index', ['status' => 'approved']) }}">
+                       href="{{ route('material-requisitions.index', array_filter(['status' => 'approved', 'project_id' => request('project_id')])) }}">
                         <i class="bi bi-check2-circle me-1"></i>
                         <span>Approved</span>
                         <span class="badge {{ $status === 'approved' ? 'bg-white text-primary' : 'bg-success-subtle text-success' }} ms-1 rounded-pill">
@@ -43,7 +43,7 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link py-2 px-3 {{ $status === 'all' ? 'active' : '' }}" 
-                       href="{{ route('material-requisitions.index', ['status' => 'all']) }}">
+                       href="{{ route('material-requisitions.index', array_filter(['status' => 'all', 'project_id' => request('project_id')])) }}">
                         <i class="bi bi-collection me-1"></i>
                         <span>All Requisitions</span>
                         <span class="badge {{ $status === 'all' ? 'bg-white text-primary' : 'bg-secondary-subtle text-secondary' }} ms-1 rounded-pill">
@@ -53,10 +53,20 @@
                 </li>
             </ul>
 
-            <!-- Specific Filter Dropdown -->
-            <form method="GET" action="{{ route('material-requisitions.index') }}" class="d-flex align-items-center gap-2">
-                <label class="form-label small text-muted mb-0 text-nowrap">Filter By:</label>
-                <select name="status" class="form-select form-select-sm" onchange="this.form.submit()" style="min-width: 170px;">
+            <!-- Filters Form: Status & Project -->
+            <form method="GET" action="{{ route('material-requisitions.index') }}" class="d-flex align-items-center gap-2 flex-wrap">
+                <!-- Project Selector Dropdown -->
+                <select name="project_id" class="form-select form-select-sm" onchange="this.form.submit()" style="min-width: 170px;">
+                    <option value="all" {{ empty($projectId) ? 'selected' : '' }}>🏢 All Projects</option>
+                    @foreach($projects as $proj)
+                        <option value="{{ $proj->id }}" {{ $projectId == $proj->id ? 'selected' : '' }}>
+                            {{ $proj->name }}
+                        </option>
+                    @endforeach
+                </select>
+
+                <!-- Status Selector Dropdown -->
+                <select name="status" class="form-select form-select-sm" onchange="this.form.submit()" style="min-width: 160px;">
                     <option value="unapproved" {{ $status == 'unapproved' ? 'selected' : '' }}>Pending / Unapproved</option>
                     <option value="submitted" {{ $status == 'submitted' ? 'selected' : '' }}>Submitted (Site)</option>
                     <option value="pm_approved" {{ $status == 'pm_approved' ? 'selected' : '' }}>PM Approved</option>
@@ -65,13 +75,25 @@
                     <option value="rejected" {{ $status == 'rejected' ? 'selected' : '' }}>Rejected</option>
                     <option value="all" {{ $status == 'all' ? 'selected' : '' }}>All Statuses</option>
                 </select>
-                @if($status !== 'unapproved')
-                <a href="{{ route('material-requisitions.index') }}" class="btn btn-sm btn-outline-secondary text-nowrap" title="Reset to Pending Approval">
+
+                @if($status !== 'unapproved' || ($projectId && request()->has('project_id')))
+                <a href="{{ route('material-requisitions.index') }}" class="btn btn-sm btn-outline-secondary text-nowrap" title="Reset Filters">
                     <i class="bi bi-arrow-clockwise me-1"></i> Reset
                 </a>
                 @endif
             </form>
         </div>
+
+        @if($currentProject)
+        <div class="d-flex align-items-center gap-2 mt-3 pt-2 border-top">
+            <span class="badge bg-primary-subtle text-primary border border-primary-subtle py-1 px-2 small">
+                <i class="bi bi-kanban me-1"></i> Showing records for: <strong>{{ $currentProject->name }}</strong>
+            </span>
+            <a href="{{ route('material-requisitions.index', ['status' => $status, 'project_id' => 'all']) }}" class="small text-muted text-decoration-none">
+                <i class="bi bi-x-circle me-1"></i>View All Projects
+            </a>
+        </div>
+        @endif
     </div>
 </div>
 
@@ -133,13 +155,25 @@
                             <i class="bi bi-inbox fs-1 d-block mb-2 text-secondary opacity-50"></i>
                             @if($status === 'unapproved')
                                 <span>No pending material requisitions awaiting approval.</span>
-                                <div class="mt-2">
-                                    <a href="{{ route('material-requisitions.index', ['status' => 'all']) }}" class="btn btn-sm btn-outline-secondary">
+                                <div class="mt-2 d-flex justify-content-center gap-2">
+                                    @if($projectId)
+                                        <a href="{{ route('material-requisitions.index', ['status' => 'unapproved', 'project_id' => 'all']) }}" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-buildings me-1"></i>Check All Projects
+                                        </a>
+                                    @endif
+                                    <a href="{{ route('material-requisitions.index', array_filter(['status' => 'all', 'project_id' => request('project_id')])) }}" class="btn btn-sm btn-outline-secondary">
                                         View All Requisitions ({{ $counts['all'] }})
                                     </a>
                                 </div>
                             @elseif($status === 'approved')
                                 <span>No approved material requisitions found.</span>
+                                @if($projectId)
+                                    <div class="mt-2">
+                                        <a href="{{ route('material-requisitions.index', ['status' => 'approved', 'project_id' => 'all']) }}" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-buildings me-1"></i>Check All Projects
+                                        </a>
+                                    </div>
+                                @endif
                             @else
                                 <span>No material requisitions found.</span>
                             @endif
