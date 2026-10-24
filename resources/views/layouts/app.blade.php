@@ -834,6 +834,12 @@
                 <span>Users & Staff</span>
             </a>
             @endcan
+            @can('role.view')
+            <a href="{{ route('roles.index') }}" class="nav-item-link {{ request()->routeIs('roles.*') ? 'active' : '' }}">
+                <i class="bi bi-shield-check"></i>
+                <span>Roles & Permissions</span>
+            </a>
+            @endcan
             @can('audit.view')
             <a href="{{ route('audit-logs.index') }}" class="nav-item-link {{ request()->routeIs('audit-logs.*') ? 'active' : '' }}">
                 <i class="bi bi-clock-history"></i>

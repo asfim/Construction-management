@@ -10,12 +10,20 @@
         </h4>
         <p class="text-muted small mb-0">Manage company staff, project managers, directors, and system access</p>
     </div>
-    @can('user.manage')
-    <a href="{{ route('users.create', $roleFilter ? ['role' => $roleFilter] : []) }}" class="btn btn-primary d-flex align-items-center gap-2 shadow-sm">
-        <i class="bi bi-person-plus-fill"></i>
-        <span>{{ $roleFilter ? "Add {$roleFilter}" : 'Add New User / Staff' }}</span>
-    </a>
-    @endcan
+    <div class="d-flex align-items-center gap-2">
+        @can('role.view')
+        <a href="{{ route('roles.index') }}" class="btn btn-outline-secondary d-flex align-items-center gap-2 shadow-sm">
+            <i class="bi bi-shield-check"></i>
+            <span>Roles &amp; Permissions</span>
+        </a>
+        @endcan
+        @can('user.manage')
+        <a href="{{ route('users.create', $roleFilter ? ['role' => $roleFilter] : []) }}" class="btn btn-primary d-flex align-items-center gap-2 shadow-sm">
+            <i class="bi bi-person-plus-fill"></i>
+            <span>{{ $roleFilter ? "Add {$roleFilter}" : 'Add New User / Staff' }}</span>
+        </a>
+        @endcan
+    </div>
 </div>
 
 @if(session('success'))
