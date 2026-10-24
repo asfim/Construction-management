@@ -8,6 +8,9 @@
         <div class="d-flex align-items-center gap-2 mb-1">
             <span class="badge bg-light text-dark border font-monospace">{{ $company->code }}</span>
             <span class="badge bg-primary-subtle text-primary">{{ $company->currency }} ({{ $company->currency_symbol }})</span>
+            <span class="badge bg-success-subtle text-success border border-success-subtle">
+                <i class="bi bi-shield-check me-1"></i> Single Company Profile
+            </span>
         </div>
         <h4 class="fw-bold mb-1 text-dark">Edit Company Settings & Profile</h4>
         <p class="text-muted small mb-0">Update company identity, logo, legal credentials, and contact details for all official prints & invoices</p>

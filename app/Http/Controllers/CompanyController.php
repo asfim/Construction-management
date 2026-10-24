@@ -12,9 +12,14 @@ use Illuminate\View\View;
 
 class CompanyController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request): View|RedirectResponse
     {
         $this->authorize('company.view');
+
+        if (Company::count() === 1 && ! $request->has('view_all')) {
+            $company = Company::first();
+            return redirect()->route('companies.edit', $company);
+        }
 
         $companies = Company::withCount(['branches', 'projects', 'users'])
             ->latest()
@@ -23,15 +28,27 @@ class CompanyController extends Controller
         return view('companies.index', compact('companies'));
     }
 
-    public function create(): View
+    public function create(): View|RedirectResponse
     {
         $this->authorize('company.manage');
+
+        if (Company::count() >= 1) {
+            $company = Company::first();
+            return redirect()->route('companies.edit', $company)
+                ->with('info', 'This system is configured for a single company. You can update your company profile and settings below.');
+        }
 
         return view('companies.create');
     }
 
     public function store(StoreCompanyRequest $request): RedirectResponse
     {
+        if (Company::count() >= 1) {
+            $company = Company::first();
+            return redirect()->route('companies.edit', $company)
+                ->with('warning', 'Only one company can be configured in this system. You can update your existing company settings below.');
+        }
+
         $validated = $request->validated();
 
         if ($request->hasFile('logo')) {

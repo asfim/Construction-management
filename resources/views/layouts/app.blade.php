@@ -777,8 +777,8 @@
             <div class="nav-category">{{ __('erp.nav.organizations') }}</div>
             @can('company.view')
             <a href="{{ route('companies.index') }}" class="nav-item-link {{ request()->routeIs('companies.*') ? 'active' : '' }}">
-                <i class="bi bi-buildings"></i>
-                <span>{{ __('erp.nav.companies') }}</span>
+                <i class="bi bi-building-gear"></i>
+                <span>Company Settings</span>
             </a>
             @endcan
             @can('branch.view')
@@ -811,24 +811,16 @@
                     <i class="bi bi-list fs-5"></i>
                 </button>
 
-                <!-- Company Selector -->
-                @if(isset($userCompanies) && $userCompanies->count() > 1)
-                <form action="{{ route('company.switch') }}" method="POST" class="d-none d-md-flex align-items-center">
-                    @csrf
-                    <i class="bi bi-building text-primary me-2"></i>
-                    <select name="company_id" class="form-select form-select-sm tenant-select" onchange="this.form.submit()">
-                        @foreach($userCompanies as $comp)
-                            <option value="{{ $comp->id }}" {{ (isset($currentCompany) && $currentCompany->id == $comp->id) ? 'selected' : '' }}>
-                                {{ $comp->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </form>
-                @elseif(isset($currentCompany))
-                <div class="d-none d-md-flex align-items-center text-muted small">
-                    <i class="bi bi-building text-primary me-2"></i>
+                <!-- Single Company Brand Display -->
+                @if(isset($currentCompany))
+                <a href="{{ route('companies.edit', $currentCompany) }}" class="d-none d-md-flex align-items-center text-decoration-none text-muted small pe-2 py-1 px-2 rounded border bg-light-subtle" title="Click to edit Company Settings">
+                    @if($currentCompany->logo_url)
+                        <img src="{{ $currentCompany->logo_url }}" alt="{{ $currentCompany->name }}" class="me-2 rounded bg-white" style="height: 22px; max-width: 65px; object-fit: contain;">
+                    @else
+                        <i class="bi bi-building text-primary me-2"></i>
+                    @endif
                     <strong class="text-dark">{{ $currentCompany->name }}</strong>
-                </div>
+                </a>
                 @endif
 
                 <!-- Active Project Selector -->
@@ -912,6 +904,20 @@
         @if(session('error'))
         <div class="alert alert-danger alert-dismissible fade show m-4 mb-0 border-0 shadow-sm" role="alert">
             <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        @endif
+
+        @if(session('warning'))
+        <div class="alert alert-warning alert-dismissible fade show m-4 mb-0 border-0 shadow-sm" role="alert">
+            <i class="bi bi-exclamation-circle-fill me-2"></i> {{ session('warning') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        @endif
+
+        @if(session('info'))
+        <div class="alert alert-info alert-dismissible fade show m-4 mb-0 border-0 shadow-sm" role="alert">
+            <i class="bi bi-info-circle-fill me-2"></i> {{ session('info') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
         @endif

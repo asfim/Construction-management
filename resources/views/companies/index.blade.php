@@ -5,14 +5,26 @@
 @section('content')
 <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-4 gap-3">
     <div>
-        <h4 class="fw-bold mb-1 text-dark">{{ __('erp.company.title') }}</h4>
-        <p class="text-muted small mb-0">Multi-company legal entities, tax profiles, and operational parameters</p>
+        <div class="d-flex align-items-center gap-2 mb-1">
+            <h4 class="fw-bold mb-0 text-dark">Company Profile & Settings</h4>
+            <span class="badge bg-success-subtle text-success border border-success-subtle">
+                <i class="bi bi-shield-check me-1"></i> Single Company
+            </span>
+        </div>
+        <p class="text-muted small mb-0">Official legal entity, logo, contact, tax IDs (BIN/TIN), and operational parameters</p>
     </div>
     @can('company.manage')
-    <a href="{{ route('companies.create') }}" class="btn btn-primary d-flex align-items-center gap-2 shadow-sm">
-        <i class="bi bi-plus-lg"></i>
-        <span>Add New Company</span>
-    </a>
+        @if($companies->count() < 1)
+        <a href="{{ route('companies.create') }}" class="btn btn-primary d-flex align-items-center gap-2 shadow-sm">
+            <i class="bi bi-plus-lg"></i>
+            <span>Add Company</span>
+        </a>
+        @else
+        <a href="{{ route('companies.edit', $companies->first()) }}" class="btn btn-primary d-flex align-items-center gap-2 shadow-sm">
+            <i class="bi bi-gear-fill"></i>
+            <span>Edit Company Settings</span>
+        </a>
+        @endif
     @endcan
 </div>
 

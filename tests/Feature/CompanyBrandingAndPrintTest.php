@@ -143,3 +143,31 @@ test('print views dynamically render updated company name, address, phone, tax i
         $mrResponse->assertSee('print-document-footer');
     }
 });
+
+test('single company mode enforces one company and redirects index and create to edit page', function () {
+    $admin = User::where('email', 'superadmin@htech.com.bd')->first();
+    $company = Company::first();
+
+    // 1. Index redirects directly to the single company's edit page
+    $indexResponse = $this->actingAs($admin)->get(route('companies.index'));
+    $indexResponse->assertRedirect(route('companies.edit', $company));
+
+    // 2. Create redirects to edit page with informational flash
+    $createResponse = $this->actingAs($admin)->get(route('companies.create'));
+    $createResponse->assertRedirect(route('companies.edit', $company));
+    $createResponse->assertSessionHas('info');
+
+    // 3. Attempting to store an additional company is rejected and redirected
+    $initialCount = Company::count();
+    $storeResponse = $this->actingAs($admin)->post(route('companies.store'), [
+        'name' => 'Second Company Ltd',
+        'code' => 'COMP-TWO',
+        'currency' => 'BDT',
+        'currency_symbol' => '৳',
+        'fiscal_year_start' => '07-01',
+    ]);
+    $storeResponse->assertRedirect(route('companies.edit', $company));
+    $storeResponse->assertSessionHas('warning');
+    expect(Company::count())->toBe($initialCount);
+});
+
