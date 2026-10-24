@@ -40,6 +40,42 @@ class Company extends Model
         ];
     }
 
+    public function getLogoUrlAttribute(): ?string
+    {
+        if (! $this->logo) {
+            return null;
+        }
+
+        if (str_starts_with($this->logo, 'http://') || str_starts_with($this->logo, 'https://')) {
+            return $this->logo;
+        }
+
+        return asset('storage/' . $this->logo);
+    }
+
+    public function getFormattedAddressAttribute(): string
+    {
+        $parts = array_filter([
+            $this->address,
+            $this->city,
+            $this->division,
+            $this->country,
+        ]);
+
+        return implode(', ', $parts) ?: 'Dhaka, Bangladesh';
+    }
+
+    public function getInitialsAttribute(): string
+    {
+        $words = preg_split('/\s+/', trim($this->name ?: 'CO'));
+        $initials = '';
+        foreach (array_slice($words, 0, 2) as $w) {
+            $initials .= mb_substr($w, 0, 1);
+        }
+
+        return strtoupper($initials ?: 'CO');
+    }
+
     public function branches(): HasMany
     {
         return $this->hasMany(Branch::class);

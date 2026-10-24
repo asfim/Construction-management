@@ -31,59 +31,38 @@
 </div>
 
 <div class="card card-custom p-4 p-md-5 bg-white border">
-    <!-- Header -->
-    <div class="row align-items-start border-bottom pb-4 mb-4">
-        <div class="col-6">
-            <h3 class="fw-bold text-primary mb-1">{{ $goodsReceipt->company?->name ?? 'H Tech Provision Construction Ltd.' }}</h3>
-            <p class="text-muted small mb-1">Project: {{ $goodsReceipt->project?->name ?? 'N/A' }} ({{ $goodsReceipt->project?->code }})</p>
-            <p class="text-muted small mb-0">Warehouse: <strong>{{ $goodsReceipt->warehouse?->name }}</strong></p>
-        </div>
-        <div class="col-6 text-end">
-            <h4 class="fw-bold text-dark text-uppercase tracking-wider">Goods Receipt Note</h4>
-            <table class="table table-sm table-borderless d-inline-block text-end w-auto mb-0">
-                <tr>
-                    <td class="text-muted small pe-2">GRN Number:</td>
-                    <td class="fw-bold">{{ $goodsReceipt->grn_number }}</td>
-                </tr>
-                <tr>
-                    <td class="text-muted small pe-2">Date Received:</td>
-                    <td class="fw-bold">{{ $goodsReceipt->received_date?->format('d-m-Y') }}</td>
-                </tr>
-                <tr>
-                    <td class="text-muted small pe-2">Challan Number:</td>
-                    <td class="fw-bold text-primary">{{ $goodsReceipt->delivery_challan_no }}</td>
-                </tr>
-                <tr>
-                    <td class="text-muted small pe-2">Status:</td>
-                    <td>
-                        @if($goodsReceipt->status === 'approved')
-                            <span class="badge bg-success">Approved & Posted</span>
-                        @else
-                            <span class="badge bg-warning text-dark">Draft / Inspection</span>
-                        @endif
-                    </td>
-                </tr>
-            </table>
-        </div>
-    </div>
+    <!-- Print Header with Admin Company Bindings -->
+    <x-print-header 
+        :company="$goodsReceipt->company" 
+        title="Goods Receipt Note (GRN)" 
+        subtitle="Material Receiving Inspection Certificate & Warehouse Inward Voucher"
+        :docNumber="$goodsReceipt->grn_number"
+        docNumberLabel="GRN Number"
+        :docDate="$goodsReceipt->received_date?->format('d-m-Y')"
+        docDateLabel="Received Date"
+        :status="$goodsReceipt->status === 'approved' ? 'Approved & Posted' : 'Draft / Inspection'"
+        :statusClass="$goodsReceipt->status === 'approved' ? 'bg-success' : 'bg-warning text-dark'"
+        :project="$goodsReceipt->project"
+        :extraMeta="['Challan No' => $goodsReceipt->delivery_challan_no, 'Warehouse' => $goodsReceipt->warehouse?->name]"
+    />
 
     <!-- PO and Supplier Details -->
     <div class="row mb-4">
         <div class="col-6">
             <h6 class="fw-bold text-uppercase text-secondary small mb-2">Supplier Details</h6>
-            <div class="fw-bold fs-6">{{ $goodsReceipt->purchaseOrder?->supplier?->name }}</div>
+            <div class="fw-bold fs-6 text-dark">{{ $goodsReceipt->purchaseOrder?->supplier?->name }}</div>
             <div class="text-muted small">{{ $goodsReceipt->purchaseOrder?->supplier?->company_name }}</div>
             <div class="text-muted small">Phone: {{ $goodsReceipt->purchaseOrder?->supplier?->phone }}</div>
-            <div class="text-muted small">Challan No.: <strong>{{ $goodsReceipt->delivery_challan_no }}</strong> | Invoice No.: {{ $goodsReceipt->supplier_invoice_no ?? '—' }}</div>
+            <div class="text-muted small">Challan No.: <strong class="text-dark">{{ $goodsReceipt->delivery_challan_no }}</strong> | Invoice No.: {{ $goodsReceipt->supplier_invoice_no ?? '—' }}</div>
         </div>
         <div class="col-6">
             <h6 class="fw-bold text-uppercase text-secondary small mb-2">PO & Receiving Details</h6>
             <div class="fw-bold fs-6">
                 Purchase Order: <a href="{{ route('purchase-orders.show', $goodsReceipt->purchase_order_id) }}" class="text-decoration-none">{{ $goodsReceipt->purchaseOrder?->po_number }}</a>
             </div>
+            <div class="text-muted small">Warehouse: <strong class="text-dark">{{ $goodsReceipt->warehouse?->name }}</strong></div>
             <div class="text-muted small">Received By: {{ $goodsReceipt->receiver?->name ?? 'Storekeeper' }}</div>
-            <div class="text-muted small">Verified By: {{ $goodsReceipt->verifier?->name ?? 'Pending' }}</div>
-            <div class="text-muted small">Verification Date: {{ $goodsReceipt->verified_at?->format('d-m-Y h:i A') ?? '—' }}</div>
+            <div class="text-muted small">Verification Date: {{ $goodsReceipt->verified_at?->format('d-m-Y h:i A') ?? 'Pending' }}</div>
         </div>
     </div>
 
@@ -120,33 +99,19 @@
         </table>
     </div>
 
-    @if($goodsReceipt->notes)
-    <div class="card card-custom p-3 bg-light mb-4">
-        <small class="fw-bold text-muted d-block">Inspection Report & Notes:</small>
-        <p class="small text-muted mb-0">{{ $goodsReceipt->notes }}</p>
-    </div>
-    @endif
-
-    <!-- Signatures -->
-    <div class="row pt-5 mt-4 text-center">
-        <div class="col-4">
-            <div class="border-top pt-2 mx-3">
-                <p class="fw-bold mb-0">{{ $goodsReceipt->receiver?->name ?? 'Storekeeper' }}</p>
-                <small class="text-muted">Received By (Storekeeper)</small>
-            </div>
-        </div>
-        <div class="col-4">
-            <div class="border-top pt-2 mx-3">
-                <p class="fw-bold mb-0">Quality Inspector / Site Engineer</p>
-                <small class="text-muted">QA/QC Inspection Lead</small>
-            </div>
-        </div>
-        <div class="col-4">
-            <div class="border-top pt-2 mx-3">
-                <p class="fw-bold mb-0">{{ $goodsReceipt->verifier?->name ?? 'Project Manager' }}</p>
-                <small class="text-muted">Authorized Approver</small>
-            </div>
-        </div>
-    </div>
+    <!-- Official Signatures -->
+    <x-print-footer 
+        :company="$goodsReceipt->company"
+        :preparedBy="$goodsReceipt->receiver?->name ?? 'Storekeeper'"
+        preparedTitle="Storekeeper / Receiver"
+        :preparedDate="$goodsReceipt->received_date?->format('d-m-Y')"
+        checkedBy="Site QA/QC Engineer"
+        checkedTitle="Quality Inspection Lead"
+        :approvedBy="$goodsReceipt->verifier?->name ?? 'Project Manager'"
+        approvedTitle="Project Manager / Approver"
+        :approvedDate="$goodsReceipt->verified_at?->format('d-m-Y')"
+        :notes="$goodsReceipt->notes"
+        :showWatermark="true"
+    />
 </div>
 @endsection

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', __('erp.app_name')) — H Tech Provision IT</title>
+    <title>@yield('title', __('erp.app_name'))@if(isset($currentCompany)) — {{ $currentCompany->name }}@endif</title>
 
     <!-- Google Fonts: Hind Siliguri (Bangla) & Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -540,11 +540,100 @@
         .progress { background: #e0e7ff; border-radius: 20px; }
         .progress-bar { background: linear-gradient(90deg, #4f46e5, #06b6d4) !important; border-radius: 20px; }
 
+        /* ---------- Ultra-Clean Executive Print Styling ---------- */
+        @page {
+            size: auto;
+            margin: 0mm;
+        }
+
         @media print {
-            body { background: #fff !important; }
-            .card-custom, .content-body .card { background: #fff !important; border: 1px solid #ddd !important; }
-            .table > thead > tr > th { background: #f1f5f9 !important; color: #000 !important; }
-            .table > tbody > tr:nth-child(even) > td { background: transparent; }
+            html, body { 
+                background: #ffffff !important; 
+                margin: 0 !important;
+            }
+            body { 
+                padding: 12mm 15mm !important;
+                color: #0f172a !important; 
+                font-size: 10.5pt !important;
+                -webkit-print-color-adjust: exact !important; 
+                print-color-adjust: exact !important;
+            }
+            .sidebar, .topbar, .footer, .d-print-none, .alert, .btn, .modal, .toast-container, .pagination { 
+                display: none !important; 
+            }
+            .main-wrapper { 
+                margin: 0 !important; 
+                padding: 0 !important; 
+                width: 100% !important; 
+                max-width: 100% !important; 
+            }
+            .content-body { 
+                padding: 0 !important; 
+                animation: none !important; 
+                width: 100% !important; 
+                margin: 0 !important; 
+            }
+            .container, .container-fluid { 
+                max-width: 100% !important; 
+                padding: 0 !important; 
+                margin: 0 !important; 
+            }
+            .card-custom, .content-body .card { 
+                background: #ffffff !important; 
+                box-shadow: none !important; 
+                border: 1px solid #cbd5e1 !important; 
+                border-radius: 4px !important;
+                page-break-inside: auto;
+            }
+            .card-header {
+                background: #f8fafc !important;
+                border-bottom: 1px solid #cbd5e1 !important;
+                color: #0f172a !important;
+            }
+            .card-header h5, .card-header h6 {
+                color: #0f172a !important;
+            }
+            .table { 
+                border-color: #cbd5e1 !important; 
+                page-break-inside: auto;
+            }
+            .table > thead > tr > th { 
+                background: #f1f5f9 !important; 
+                color: #0f172a !important; 
+                border: 1px solid #cbd5e1 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                font-size: 0.82rem;
+            }
+            .table > tbody > tr > td { 
+                border: 1px solid #e2e8f0 !important; 
+                background: transparent !important;
+                font-size: 0.85rem;
+            }
+            .table > tfoot > tr > td {
+                border: 1px solid #cbd5e1 !important;
+                background: #f8fafc !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            tr { page-break-inside: avoid !important; }
+            .print-document-header { page-break-after: avoid !important; }
+            .print-signatures-row { page-break-inside: avoid !important; }
+            .print-hide-icon { display: none !important; }
+            .col-print-7 { width: 58.33333333% !important; flex: 0 0 auto !important; }
+            .col-print-5 { width: 41.66666667% !important; flex: 0 0 auto !important; }
+            .text-print-end { text-align: right !important; }
+            .badge {
+                border: 1px solid #94a3b8 !important;
+                color: #0f172a !important;
+                background: #f1f5f9 !important;
+                -webkit-print-color-adjust: exact !important;
+            }
+            .print-company-logo {
+                max-height: 70px !important;
+                max-width: 150px !important;
+                object-fit: contain !important;
+            }
         }
     </style>
     @stack('styles')
@@ -787,6 +876,16 @@
                             <small class="text-muted d-block">{{ auth()->user()->email }}</small>
                             <small class="text-primary fw-medium">{{ auth()->user()->designation ?? 'Team Member' }}</small>
                         </li>
+                        @if(isset($currentCompany))
+                            @can('company.manage')
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="{{ route('companies.edit', $currentCompany) }}">
+                                    <i class="bi bi-gear-fill text-primary"></i>
+                                    <span>Company Settings</span>
+                                </a>
+                            </li>
+                            @endcan
+                        @endif
                         <li>
                             <form action="{{ route('logout') }}" method="POST" class="m-0">
                                 @csrf

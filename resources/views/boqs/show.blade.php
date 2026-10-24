@@ -3,7 +3,7 @@
 @section('title', "BOQ Version {$boq->version_number} — {$project->name}")
 
 @section('content')
-<div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-4 gap-3">
+<div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-4 gap-3 d-print-none">
     <div>
         <div class="d-flex align-items-center gap-2 mb-1">
             <span class="badge bg-primary px-3 py-1 font-monospace fs-6">BOQ Version {{ $boq->version_number }}</span>
@@ -67,11 +67,32 @@
         </form>
         @endif
         @endcan
+        <button type="button" class="btn btn-outline-dark d-flex align-items-center gap-1 shadow-sm" onclick="window.print()">
+            <i class="bi bi-printer"></i>
+            <span>Print BOQ</span>
+        </button>
         <a href="{{ route('projects.boqs.index', $project) }}" class="btn btn-outline-secondary d-flex align-items-center gap-2">
             <i class="bi bi-arrow-left"></i>
             <span>Revisions List</span>
         </a>
     </div>
+</div>
+
+<!-- Print-Only Executive Document Header -->
+<div class="d-none d-print-block mb-4">
+    <x-print-header 
+        :company="$project->company" 
+        title="Bill of Quantities (BOQ)" 
+        subtitle="Contract Baseline, Engineering Estimates & Rate Specification"
+        :docNumber="'BOQ-V' . $boq->version_number"
+        docNumberLabel="BOQ Version"
+        :docDate="$boq->created_at?->format('d-m-Y')"
+        docDateLabel="Creation Date"
+        :status="$boq->is_locked ? 'Approved & Locked' : 'Draft Revision'"
+        :statusClass="$boq->is_locked ? 'bg-success' : 'bg-warning text-dark'"
+        :project="$project"
+        :extraMeta="['Total Amount' => ($project->company?->currency_symbol ?? '৳') . ' ' . number_format($boq->total_amount, 2), 'Total Items' => $boq->items->count()]"
+    />
 </div>
 
 <!-- Financial Summary Bar -->
@@ -196,8 +217,19 @@
                 </tfoot>
                 @endif
             </table>
-        </div>
     </div>
+</div>
+
+<!-- Print-Only Executive Document Signatures -->
+<div class="d-none d-print-block mt-4">
+    <x-print-footer 
+        :company="$project->company"
+        preparedTitle="Quantity Surveyor (Prepared By)"
+        checkedTitle="Chief Estimator / Project Manager"
+        approvedTitle="Executive Director / Client Signatory"
+        notes="All line items and unit rates specified herein are subject to formal contract baseline specifications and approved engineering methodologies."
+        :showWatermark="true"
+    />
 </div>
 @endsection
 

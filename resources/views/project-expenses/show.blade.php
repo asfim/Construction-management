@@ -3,7 +3,7 @@
 @section('title', "Expense Voucher: {$projectExpense->voucher_number}")
 
 @section('content')
-<div class="d-flex align-items-center justify-content-between mb-4">
+<div class="d-flex align-items-center justify-content-between mb-4 d-print-none">
     <div>
         <div class="d-flex align-items-center gap-2 mb-1">
             <span class="badge bg-light text-dark border font-monospace fs-6">{{ $projectExpense->voucher_number }}</span>
@@ -27,35 +27,28 @@
 </div>
 
 <div class="row g-4 justify-content-center">
-    <div class="col-12 col-lg-8">
-        <div class="card card-custom border-0 shadow-sm p-4">
-            <div class="d-flex justify-content-between align-items-start border-bottom pb-3 mb-4">
-                <div>
-                    <h5 class="fw-bold text-dark mb-1">Disbursement Payment Voucher</h5>
-                    <small class="text-muted">H Tech Provision Construction ERP</small>
-                </div>
-                <div class="text-end">
-                    <span class="text-muted small d-block">Voucher Date</span>
-                    <strong class="text-dark">{{ $projectExpense->expense_date->format('d M, Y') }}</strong>
-                </div>
-            </div>
+    <div class="col-12 col-lg-9">
+        <div class="card card-custom border-0 shadow-sm p-4 p-md-5 bg-white">
+            <!-- Print Header with Admin Company Bindings -->
+            <x-print-header 
+                :company="$projectExpense->project?->company" 
+                title="Expense Voucher" 
+                subtitle="Site Cash Disbursement & Cost Accounting Payment Voucher"
+                :docNumber="$projectExpense->voucher_number"
+                docNumberLabel="Voucher No"
+                :docDate="$projectExpense->expense_date->format('d-m-Y')"
+                docDateLabel="Voucher Date"
+                status="Recorded & Paid"
+                statusClass="bg-success"
+                :project="$projectExpense->project"
+                :extraMeta="['Cost Code' => $projectExpense->costCode?->code . ' - ' . $projectExpense->costCode?->name, 'Payment Mode' => str_replace('_', ' ', strtoupper($projectExpense->payment_method))]"
+            />
 
-            <table class="table table-borderless align-middle mb-4">
+            <table class="table table-bordered align-middle mb-4">
                 <tbody>
                     <tr>
-                        <td class="text-muted" style="width: 35%;">Project Name:</td>
-                        <td class="fw-bold text-dark">{{ $projectExpense->project?->name }} ({{ $projectExpense->project?->code }})</td>
-                    </tr>
-                    <tr>
-                        <td class="text-muted">Cost Code Head:</td>
-                        <td>
-                            <span class="badge bg-light text-dark border font-monospace">{{ $projectExpense->costCode?->code }}</span>
-                            <span class="ms-2 fw-semibold text-dark">{{ $projectExpense->costCode?->name }}</span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="text-muted">Payee / Recipient:</td>
-                        <td class="fw-bold text-dark">{{ $projectExpense->payee_name }}</td>
+                        <td class="text-muted" style="width: 30%;">Payee / Recipient:</td>
+                        <td class="fw-bold text-dark fs-6">{{ $projectExpense->payee_name }}</td>
                     </tr>
                     <tr>
                         <td class="text-muted">Payment Mode:</td>
@@ -66,32 +59,37 @@
                         </td>
                     </tr>
                     <tr>
-                        <td class="text-muted">Reference / Memo No:</td>
-                        <td class="text-dark">{{ $projectExpense->reference_no ?? '—' }}</td>
+                        <td class="text-muted">Reference / Memo / Bill No:</td>
+                        <td class="text-dark font-monospace fw-semibold">{{ $projectExpense->reference_no ?? '—' }}</td>
                     </tr>
                     <tr>
                         <td class="text-muted">Description / Particulars:</td>
                         <td class="text-dark">{{ $projectExpense->description }}</td>
                     </tr>
-                    <tr class="table-light">
+                    <tr class="table-primary">
                         <td class="fw-bold text-dark fs-6">Total Amount Paid:</td>
-                        <td class="fw-bold text-danger font-monospace fs-4">৳ {{ number_format($projectExpense->amount, 2) }}</td>
+                        <td class="fw-bold text-primary font-monospace fs-4">
+                            {{ $projectExpense->project?->company?->currency_symbol ?? '৳' }} {{ number_format($projectExpense->amount, 2) }}
+                        </td>
                     </tr>
                 </tbody>
             </table>
 
-            <div class="row pt-4 mt-4 border-top text-center">
-                <div class="col-6">
-                    <small class="text-muted d-block mb-3">Prepared By:</small>
-                    <strong class="text-dark d-block">{{ $projectExpense->creator?->name ?? 'Accounts Officer' }}</strong>
-                    <small class="text-muted">{{ $projectExpense->created_at->format('d-m-Y H:i') }}</small>
-                </div>
-                <div class="col-6">
-                    <small class="text-muted d-block mb-3">Verified & Approved By:</small>
-                    <strong class="text-dark d-block">{{ $projectExpense->approver?->name ?? 'Project Manager' }}</strong>
-                    <small class="text-muted">{{ $projectExpense->approved_at ? $projectExpense->approved_at->format('d-m-Y H:i') : 'System Approved' }}</small>
-                </div>
-            </div>
+            <!-- Official Signatures -->
+            <x-print-footer 
+                :company="$projectExpense->project?->company"
+                :preparedBy="$projectExpense->creator?->name ?? 'Accounts Officer'"
+                preparedTitle="Accounts Officer / Cashier"
+                :preparedDate="$projectExpense->created_at->format('d-m-Y H:i')"
+                :checkedBy="$projectExpense->approver?->name ?? 'Project Manager'"
+                checkedTitle="Project Manager / Approver"
+                :approvedDate="$projectExpense->approved_at ? $projectExpense->approved_at->format('d-m-Y H:i') : null"
+                :approvedBy="null"
+                :clientBy="$projectExpense->payee_name"
+                clientTitle="Payee / Recipient Signature"
+                notes="Received the above mentioned sum in full and final settlement against certified project expenditure."
+                :showWatermark="true"
+            />
         </div>
     </div>
 </div>

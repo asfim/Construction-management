@@ -3,7 +3,7 @@
 @section('title', 'Material Requisition: ' . $materialRequisition->requisition_no)
 
 @section('content')
-<div class="d-flex align-items-center justify-content-between mb-4">
+<div class="d-flex align-items-center justify-content-between mb-4 d-print-none">
     <div>
         <h4 class="fw-bold mb-1">Material Requisition: {{ $materialRequisition->requisition_no }}</h4>
         <p class="text-muted small mb-0">Project: {{ $materialRequisition->project?->name ?? 'N/A' }} | Requisition Date: {{ $materialRequisition->requisition_date?->format('d-m-Y') }}</p>
@@ -12,6 +12,10 @@
         <a href="{{ route('material-requisitions.index') }}" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left me-1"></i> Back to List
         </a>
+
+        <button onclick="window.print()" class="btn btn-outline-dark">
+            <i class="bi bi-printer me-1"></i> Print MR (A4)
+        </button>
 
         @can('mr.approve')
             @if($materialRequisition->status === 'submitted')
@@ -41,97 +45,114 @@
     </div>
 </div>
 
-<div class="row g-4 mb-4">
-    <div class="col-md-3">
-        <div class="card card-custom p-3">
-            <small class="text-muted d-block">Status</small>
-            <div class="mt-1">
-                @if($materialRequisition->status === 'approved')
-                    <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 fs-6">Approved</span>
-                @elseif($materialRequisition->status === 'pm_approved')
-                    <span class="badge bg-info-subtle text-info border border-info-subtle px-3 py-2 fs-6">PM Approved</span>
-                @elseif($materialRequisition->status === 'submitted')
-                    <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-3 py-2 fs-6">Submitted</span>
-                @else
-                    <span class="badge bg-secondary px-3 py-2 fs-6">{{ ucfirst($materialRequisition->status) }}</span>
-                @endif
+<div class="card card-custom p-4 p-md-5 bg-white border">
+    <!-- Print Header with Admin Company Bindings -->
+    <x-print-header 
+        :company="$materialRequisition->project?->company" 
+        title="Material Requisition Note" 
+        subtitle="Site Material Indent & Internal Store Procurement Requisition"
+        :docNumber="$materialRequisition->requisition_no"
+        docNumberLabel="MR Number"
+        :docDate="$materialRequisition->requisition_date?->format('d-m-Y')"
+        docDateLabel="Indent Date"
+        :status="ucfirst(str_replace('_', ' ', $materialRequisition->status))"
+        :statusClass="$materialRequisition->status === 'approved' ? 'bg-success' : ($materialRequisition->status === 'pm_approved' ? 'bg-info text-white' : ($materialRequisition->status === 'submitted' ? 'bg-warning text-dark' : 'bg-secondary'))"
+        :project="$materialRequisition->project"
+    />
+
+    <!-- Status Overview Strip (Screen Friendly) -->
+    <div class="row g-3 mb-4 d-print-none">
+        <div class="col-md-3">
+            <div class="card card-custom p-3 bg-light border">
+                <small class="text-muted d-block">Status</small>
+                <div class="mt-1">
+                    @if($materialRequisition->status === 'approved')
+                        <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-1 fs-6">Approved</span>
+                    @elseif($materialRequisition->status === 'pm_approved')
+                        <span class="badge bg-info-subtle text-info border border-info-subtle px-3 py-1 fs-6">PM Approved</span>
+                    @elseif($materialRequisition->status === 'submitted')
+                        <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-3 py-1 fs-6">Submitted</span>
+                    @else
+                        <span class="badge bg-secondary px-3 py-1 fs-6">{{ ucfirst($materialRequisition->status) }}</span>
+                    @endif
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card card-custom p-3 bg-light border">
+                <small class="text-muted d-block">Submitted By</small>
+                <div class="fw-bold mt-1 text-dark">{{ $materialRequisition->submittedBy?->name ?? 'N/A' }}</div>
+                <small class="text-secondary">{{ $materialRequisition->created_at->format('d-m-Y h:i A') }}</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card card-custom p-3 bg-light border">
+                <small class="text-muted d-block">PM Approval</small>
+                <div class="fw-bold mt-1 text-dark">{{ $materialRequisition->pmApprovedBy?->name ?? 'Pending' }}</div>
+                <small class="text-secondary">{{ $materialRequisition->pm_approved_at?->format('d-m-Y h:i A') ?? '—' }}</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card card-custom p-3 bg-light border">
+                <small class="text-muted d-block">Final Approval</small>
+                <div class="fw-bold mt-1 text-dark">{{ $materialRequisition->approvedBy?->name ?? 'Pending' }}</div>
+                <small class="text-secondary">{{ $materialRequisition->approved_at?->format('d-m-Y h:i A') ?? '—' }}</small>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card card-custom p-3">
-            <small class="text-muted d-block">Submitted By</small>
-            <div class="fw-bold mt-1 fs-6">{{ $materialRequisition->submittedBy?->name ?? 'N/A' }}</div>
-            <small class="text-secondary">{{ $materialRequisition->created_at->format('d-m-Y h:i A') }}</small>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card card-custom p-3">
-            <small class="text-muted d-block">PM Approval</small>
-            <div class="fw-bold mt-1 fs-6">{{ $materialRequisition->pmApprovedBy?->name ?? 'Pending' }}</div>
-            <small class="text-secondary">{{ $materialRequisition->pm_approved_at?->format('d-m-Y h:i A') ?? '—' }}</small>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card card-custom p-3">
-            <small class="text-muted d-block">Final Approval (Procurement Head)</small>
-            <div class="fw-bold mt-1 fs-6">{{ $materialRequisition->approvedBy?->name ?? 'Pending' }}</div>
-            <small class="text-secondary">{{ $materialRequisition->approved_at?->format('d-m-Y h:i A') ?? '—' }}</small>
-        </div>
-    </div>
-</div>
 
-<div class="card card-custom mb-4">
-    <div class="card-header bg-white py-3">
-        <h5 class="fw-bold mb-0">Requisition Items Breakdown</h5>
+    <!-- Requisition Items Breakdown Table -->
+    <div class="table-responsive mb-4">
+        <table class="table table-bordered align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th style="width: 5%;" class="text-center">#</th>
+                    <th style="width: 35%;">Item & Specification</th>
+                    <th style="width: 20%;">Cost Code</th>
+                    <th style="width: 13%;" class="text-end">Requested Qty</th>
+                    <th style="width: 13%;" class="text-end">Approved Qty</th>
+                    <th style="width: 14%;">Remarks / Purpose</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($materialRequisition->items as $index => $item)
+                <tr>
+                    <td class="text-center">{{ $index + 1 }}</td>
+                    <td>
+                        <div class="fw-bold text-dark">{{ $item->item?->name }}</div>
+                        <small class="text-muted">{{ $item->item?->code }} ({{ $item->item?->unit?->symbol }})</small>
+                    </td>
+                    <td>
+                        @if($item->costCode)
+                            <span class="badge bg-light text-dark border">{{ $item->costCode->code }}</span>
+                            <small class="d-block text-muted">{{ $item->costCode->name }}</small>
+                        @else
+                            <span class="text-muted">—</span>
+                        @endif
+                    </td>
+                    <td class="text-end fw-bold text-dark">{{ number_format($item->quantity_requested, 4) }} {{ $item->item?->unit?->symbol }}</td>
+                    <td class="text-end text-success fw-bold">{{ number_format($item->quantity_approved, 4) }} {{ $item->item?->unit?->symbol }}</td>
+                    <td class="small text-muted">{{ $item->remarks ?? 'Site execution' }}</td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
     </div>
-    <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-bordered align-middle mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th class="ps-4">#</th>
-                        <th>Item & Code</th>
-                        <th>Cost Code</th>
-                        <th class="text-end">Requested Qty</th>
-                        <th class="text-end">Approved Qty</th>
-                        <th class="text-end">Ordered Qty</th>
-                        <th>Remarks</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($materialRequisition->items as $index => $item)
-                    <tr>
-                        <td class="ps-4">{{ $index + 1 }}</td>
-                        <td>
-                            <div class="fw-bold">{{ $item->item?->name }}</div>
-                            <small class="text-muted">{{ $item->item?->code }}</small>
-                        </td>
-                        <td>
-                            @if($item->costCode)
-                                <span class="badge bg-light text-dark border">{{ $item->costCode->code }} - {{ $item->costCode->name }}</span>
-                            @else
-                                <span class="text-muted">—</span>
-                            @endif
-                        </td>
-                        <td class="text-end fw-bold">{{ number_format($item->quantity_requested, 4) }} {{ $item->item?->unit?->symbol }}</td>
-                        <td class="text-end text-success fw-bold">{{ number_format($item->quantity_approved, 4) }} {{ $item->item?->unit?->symbol }}</td>
-                        <td class="text-end text-primary fw-bold">{{ number_format($item->quantity_ordered, 4) }} {{ $item->item?->unit?->symbol }}</td>
-                        <td>{{ $item->remarks ?? '—' }}</td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
 
-@if($materialRequisition->notes)
-<div class="card card-custom">
-    <div class="card-body">
-        <h6 class="fw-bold text-muted mb-2">Usage Purpose / Special Instructions:</h6>
-        <p class="mb-0">{{ $materialRequisition->notes }}</p>
-    </div>
+    <!-- Official Signatures -->
+    <x-print-footer 
+        :company="$materialRequisition->project?->company"
+        :preparedBy="$materialRequisition->submittedBy?->name ?? 'Site Engineer'"
+        preparedTitle="Site Engineer (Raised By)"
+        :preparedDate="$materialRequisition->requisition_date?->format('d-m-Y')"
+        :checkedBy="$materialRequisition->pmApprovedBy?->name ?? 'Project Manager'"
+        checkedTitle="Project Manager (Verified By)"
+        :checkedDate="$materialRequisition->pm_approved_at?->format('d-m-Y')"
+        :approvedBy="$materialRequisition->approvedBy?->name ?? 'Head of Procurement'"
+        approvedTitle="Procurement Head (Authorized)"
+        :approvedDate="$materialRequisition->approved_at?->format('d-m-Y')"
+        :notes="$materialRequisition->notes"
+        :showWatermark="true"
+    />
 </div>
-@endif
 @endsection

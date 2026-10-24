@@ -3,7 +3,7 @@
 @section('title', $project->name)
 
 @section('content')
-<div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-4 gap-3">
+<div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-4 gap-3 d-print-none">
     <div>
         <div class="d-flex align-items-center gap-2 mb-1">
             <span class="badge bg-light text-dark border font-monospace">{{ $project->code }}</span>
@@ -32,11 +32,31 @@
             <span>{{ __('erp.actions.edit') }}</span>
         </a>
         @endcan
+        <button type="button" class="btn btn-outline-dark d-flex align-items-center gap-2 shadow-sm" onclick="window.print()">
+            <i class="bi bi-printer"></i>
+            <span>Print Profile</span>
+        </button>
         <a href="{{ route('projects.index') }}" class="btn btn-outline-secondary d-flex align-items-center gap-2">
             <i class="bi bi-arrow-left"></i>
             <span>{{ __('erp.actions.back') }}</span>
         </a>
     </div>
+</div>
+
+<!-- Print-Only Executive Document Header -->
+<div class="d-none d-print-block mb-4">
+    <x-print-header 
+        :company="$project->company" 
+        title="Project Master Profile" 
+        subtitle="Contract Specifications, Milestones & Financial Overview" 
+        :docNumber="$project->code" 
+        docNumberLabel="Project Code" 
+        :docDate="now()->format('d-m-Y')" 
+        docDateLabel="Profile Date" 
+        :status="ucfirst($project->status)" 
+        :project="$project" 
+        :extraMeta="['Client' => $project->client_name, 'Contract Value' => ($project->company?->currency_symbol ?? '৳') . ' ' . number_format($project->contract_value, 2)]" 
+    />
 </div>
 
 <!-- Financial & Progress Summary Cards -->

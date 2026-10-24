@@ -3,7 +3,7 @@
 @section('title', "RA Bill: {$clientBill->bill_number}")
 
 @section('content')
-<div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-4 gap-3">
+<div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-4 gap-3 d-print-none">
     <div>
         <div class="d-flex align-items-center gap-2 mb-1">
             <span class="badge bg-light text-dark border font-monospace fs-6">{{ $clientBill->bill_number }}</span>
@@ -54,6 +54,22 @@
         </a>
     </div>
 </div>
+
+<div class="card card-custom p-4 p-md-5 bg-white border">
+    <!-- Print Header with Admin Company Bindings -->
+    <x-print-header 
+        :company="$clientBill->project?->company" 
+        title="Running Account Bill" 
+        subtitle="Interim Payment Certificate & Civil Works Measurement Statement"
+        :docNumber="$clientBill->bill_number"
+        docNumberLabel="RA Bill No"
+        :docDate="$clientBill->bill_date?->format('d-m-Y') ?? $clientBill->created_at->format('d-m-Y')"
+        docDateLabel="Bill Date"
+        :status="ucfirst($clientBill->status)"
+        :statusClass="$clientBill->status === 'paid' ? 'bg-success' : ($clientBill->status === 'certified' ? 'bg-primary' : 'bg-warning text-dark')"
+        :project="$clientBill->project"
+        :extraMeta="['Client Name' => $clientBill->project?->client_name, 'Period' => ($clientBill->period_start ? $clientBill->period_start->format('d/m/Y') . ' - ' . $clientBill->period_end->format('d/m/Y') : null)]"
+    />
 
 <!-- Financial Summary Strip -->
 <div class="row g-4 mb-4">
@@ -163,28 +179,21 @@
     </div>
 </div>
 
-<!-- Signoff / Certification Block -->
-<div class="row g-4">
-    <div class="col-12 col-md-4 text-center">
-        <div class="p-4 bg-light rounded-3 border">
-            <small class="text-muted d-block mb-4">Prepared By (Quantity Surveyor)</small>
-            <strong class="text-dark d-block">{{ $clientBill->creator?->name ?? 'QS Staff' }}</strong>
-            <small class="text-muted">{{ $clientBill->created_at->format('d-m-Y') }}</small>
-        </div>
-    </div>
-    <div class="col-12 col-md-4 text-center">
-        <div class="p-4 bg-light rounded-3 border">
-            <small class="text-muted d-block mb-4">Checked By (Project Manager)</small>
-            <strong class="text-dark d-block">{{ $clientBill->project?->projectManager?->name ?? 'Project Manager' }}</strong>
-            <small class="text-muted">Operations Verification</small>
-        </div>
-    </div>
-    <div class="col-12 col-md-4 text-center">
-        <div class="p-4 bg-light rounded-3 border">
-            <small class="text-muted d-block mb-4">Certified By (Client / Consultant)</small>
-            <strong class="text-dark d-block">{{ $clientBill->certifier?->name ?? ($clientBill->status === 'certified' || $clientBill->status === 'paid' ? 'Consultant Representative' : 'Awaiting Certification') }}</strong>
-            <small class="text-muted">{{ $clientBill->certified_at ? $clientBill->certified_at->format('d-m-Y') : 'Pending' }}</small>
-        </div>
-    </div>
+    <!-- Official Signatures & Certification Block -->
+    <x-print-footer 
+        :company="$clientBill->project?->company"
+        :preparedBy="$clientBill->creator?->name ?? 'Quantity Surveyor'"
+        preparedTitle="Quantity Surveyor (Prepared By)"
+        :preparedDate="$clientBill->created_at?->format('d-m-Y')"
+        :checkedBy="$clientBill->project?->projectManager?->name ?? 'Project Manager'"
+        checkedTitle="Project Manager (Checked & Verified)"
+        :approvedBy="$clientBill->certifier?->name ?? ($clientBill->status === 'certified' || $clientBill->status === 'paid' ? 'Consultant Representative' : 'Pending Certification')"
+        approvedTitle="Authorized Engineer / Consultant"
+        :approvedDate="$clientBill->certified_at ? $clientBill->certified_at->format('d-m-Y') : null"
+        :clientBy="$clientBill->project?->client_name ? $clientBill->project->client_name . ' Representative' : null"
+        clientTitle="Client Certification"
+        :notes="$clientBill->notes ?? 'This Interim Payment Certificate is prepared in accordance with the measured quantity of works executed on site and contract specifications.'"
+        :showWatermark="true"
+    />
 </div>
 @endsection

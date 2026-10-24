@@ -33,6 +33,8 @@ class StoreCompanyRequest extends FormRequest
             'address' => ['nullable', 'string'],
             'city' => ['nullable', 'string', 'max:100'],
             'division' => ['nullable', 'string', 'max:100'],
+            'country' => ['nullable', 'string', 'max:100'],
+            'logo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,svg,webp', 'max:2048'],
             'currency' => ['required', 'string', 'max:10'],
             'currency_symbol' => ['required', 'string', 'max:10'],
             'fiscal_year_start' => ['required', 'string', 'max:10'],

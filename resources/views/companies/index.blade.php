@@ -39,10 +39,21 @@
                             <span class="badge bg-light text-dark border font-monospace">{{ $company->code }}</span>
                         </td>
                         <td>
-                            <a href="{{ route('companies.show', $company) }}" class="fw-bold text-dark text-decoration-none d-block">
-                                {{ $company->name }}
-                            </a>
-                            <small class="text-muted">{{ $company->legal_name }}</small>
+                            <div class="d-flex align-items-center gap-2">
+                                @if($company->logo_url)
+                                    <img src="{{ $company->logo_url }}" alt="{{ $company->name }}" class="border rounded bg-white p-1" style="width: 38px; height: 38px; object-fit: contain;">
+                                @else
+                                    <div class="rounded d-flex align-items-center justify-content-center text-white fw-bold" style="width: 38px; height: 38px; background: linear-gradient(135deg, #1e3a8a, #0284c7); font-size: 0.85rem;">
+                                        <i class="bi bi-building"></i>
+                                    </div>
+                                @endif
+                                <div>
+                                    <a href="{{ route('companies.show', $company) }}" class="fw-bold text-dark text-decoration-none d-block">
+                                        {{ $company->name }}
+                                    </a>
+                                    <small class="text-muted">{{ $company->legal_name }}</small>
+                                </div>
+                            </div>
                         </td>
                         <td>
                             <small class="d-block text-muted"><strong>BIN:</strong> {{ $company->bin ?? '—' }}</small>
@@ -65,9 +76,16 @@
                             @endif
                         </td>
                         <td class="text-end">
-                            <a href="{{ route('companies.show', $company) }}" class="btn btn-sm btn-outline-primary">
-                                <i class="bi bi-eye"></i> Details
-                            </a>
+                            <div class="btn-group btn-group-sm">
+                                <a href="{{ route('companies.show', $company) }}" class="btn btn-outline-primary" title="Details">
+                                    <i class="bi bi-eye"></i> Details
+                                </a>
+                                @can('company.manage')
+                                <a href="{{ route('companies.edit', $company) }}" class="btn btn-outline-secondary" title="Edit Company">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                @endcan
+                            </div>
                         </td>
                     </tr>
                     @empty

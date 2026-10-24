@@ -3,19 +3,41 @@
 @section('title', $company->name)
 
 @section('content')
-<div class="d-flex align-items-center justify-content-between mb-4">
-    <div>
-        <div class="d-flex align-items-center gap-2 mb-1">
-            <span class="badge bg-light text-dark border font-monospace">{{ $company->code }}</span>
-            <span class="badge bg-primary-subtle text-primary">{{ $company->currency }} ({{ $company->currency_symbol }})</span>
+<div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-4 gap-3">
+    <div class="d-flex align-items-center gap-3">
+        @if($company->logo_url)
+            <img src="{{ $company->logo_url }}" alt="{{ $company->name }}" class="p-1 border rounded bg-white shadow-sm" style="height: 60px; max-width: 120px; object-fit: contain;">
+        @else
+            <div class="d-flex align-items-center justify-content-center text-white fw-bold rounded shadow-sm" style="width: 55px; height: 55px; background: linear-gradient(135deg, #1e3a8a, #0284c7); font-size: 1.4rem;">
+                <i class="bi bi-building"></i>
+            </div>
+        @endif
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="badge bg-light text-dark border font-monospace">{{ $company->code }}</span>
+                <span class="badge bg-primary-subtle text-primary">{{ $company->currency }} ({{ $company->currency_symbol }})</span>
+                @if($company->is_active)
+                    <span class="badge bg-success-subtle text-success">Active</span>
+                @else
+                    <span class="badge bg-danger-subtle text-danger">Inactive</span>
+                @endif
+            </div>
+            <h4 class="fw-bold mb-1 text-dark">{{ $company->name }}</h4>
+            <p class="text-muted small mb-0">{{ $company->legal_name }}</p>
         </div>
-        <h4 class="fw-bold mb-1 text-dark">{{ $company->name }}</h4>
-        <p class="text-muted small mb-0">{{ $company->legal_name }}</p>
     </div>
-    <a href="{{ route('companies.index') }}" class="btn btn-outline-secondary d-flex align-items-center gap-2">
-        <i class="bi bi-arrow-left"></i>
-        <span>{{ __('erp.actions.back') }}</span>
-    </a>
+    <div class="d-flex align-items-center gap-2">
+        @can('company.manage')
+        <a href="{{ route('companies.edit', $company) }}" class="btn btn-primary d-flex align-items-center gap-2 shadow-sm">
+            <i class="bi bi-pencil-square"></i>
+            <span>Edit Company Settings</span>
+        </a>
+        @endcan
+        <a href="{{ route('companies.index') }}" class="btn btn-outline-secondary d-flex align-items-center gap-2">
+            <i class="bi bi-arrow-left"></i>
+            <span>{{ __('erp.actions.back') }}</span>
+        </a>
+    </div>
 </div>
 
 <div class="row g-4 mb-4">

@@ -3,7 +3,7 @@
 @section('title', "Project Budget & Cost Control — {$project->name}")
 
 @section('content')
-<div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-4 gap-3">
+<div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-4 gap-3 d-print-none">
     <div>
         <div class="d-flex align-items-center gap-2 mb-1">
             <span class="badge bg-light text-dark border font-monospace">{{ $project->code }}</span>
@@ -13,11 +13,30 @@
         <p class="text-muted small mb-0">{{ $project->name }}</p>
     </div>
     <div class="d-flex align-items-center gap-2">
+        <button type="button" class="btn btn-outline-dark d-flex align-items-center gap-2 shadow-sm" onclick="window.print()">
+            <i class="bi bi-printer"></i>
+            <span>Print Budget</span>
+        </button>
         <a href="{{ route('projects.show', $project) }}" class="btn btn-outline-secondary d-flex align-items-center gap-2">
             <i class="bi bi-arrow-left"></i>
             <span>Project Profile</span>
         </a>
     </div>
+</div>
+
+<!-- Print-Only Executive Document Header -->
+<div class="d-none d-print-block mb-4">
+    <x-print-header 
+        :company="$project->company" 
+        title="Project Budget & Cost Control" 
+        subtitle="Internal Approved Baseline & Cost Variance Tracking" 
+        :docNumber="$budget->budget_code" 
+        docNumberLabel="Budget Code" 
+        :docDate="now()->format('d-m-Y')" 
+        docDateLabel="Statement Date" 
+        :project="$project" 
+        :extraMeta="['Planned Budget' => ($project->company?->currency_symbol ?? '৳') . ' ' . number_format($totalPlanned, 2), 'Actual Exp' => ($project->company?->currency_symbol ?? '৳') . ' ' . number_format($totalActual, 2)]" 
+    />
 </div>
 
 <!-- 4 Cost Control Summary Cards -->
@@ -135,6 +154,18 @@
             </table>
         </div>
     </div>
+</div>
+
+<!-- Print-Only Executive Document Signatures -->
+<div class="d-none d-print-block mt-4">
+    <x-print-footer 
+        :company="$project->company"
+        preparedTitle="Cost Control Engineer (Prepared By)"
+        checkedTitle="Project Manager (Verified)"
+        approvedTitle="Finance Director / Managing Director"
+        notes="Internal cost control budget baseline approved for operational tracking against issued purchase orders and certified contractor expenditure."
+        :showWatermark="true"
+    />
 </div>
 
 <!-- Modal: Add Budget Line -->

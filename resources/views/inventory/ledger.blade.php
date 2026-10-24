@@ -3,17 +3,35 @@
 @section('title', 'Inventory & Stock Ledger')
 
 @section('content')
-<div class="d-flex align-items-center justify-content-between mb-4">
+<div class="d-flex align-items-center justify-content-between mb-4 d-print-none">
     <div>
         <h4 class="fw-bold mb-1">Inventory Ledger & Stock Movement</h4>
         <p class="text-muted small mb-0">Warehouse stock balances, moving average valuation, receipts, and site issue movements</p>
     </div>
-    @can('inventory.issue')
-    <a href="{{ route('inventory.issues.create') }}" class="btn btn-warning text-dark d-flex align-items-center gap-2 fw-semibold">
-        <i class="bi bi-box-arrow-up-right"></i>
-        <span>Issue Stock to Site</span>
-    </a>
-    @endcan
+    <div class="d-flex gap-2">
+        <button onclick="window.print()" class="btn btn-outline-dark d-flex align-items-center gap-2">
+            <i class="bi bi-printer"></i>
+            <span>Print Stock Report</span>
+        </button>
+        @can('inventory.issue')
+        <a href="{{ route('inventory.issues.create') }}" class="btn btn-warning text-dark d-flex align-items-center gap-2 fw-semibold">
+            <i class="bi bi-box-arrow-up-right"></i>
+            <span>Issue Stock to Site</span>
+        </a>
+        @endcan
+    </div>
+</div>
+
+<!-- Print-Only Executive Document Header -->
+<div class="d-none d-print-block mb-4">
+    <x-print-header 
+        :company="$currentCompany" 
+        title="Warehouse Inventory & Stock Valuation" 
+        subtitle="Current Stock Balance Ledger & Material Movements Statement" 
+        :docDate="now()->format('d-m-Y')" 
+        docDateLabel="Valuation Date" 
+        :extraMeta="['Total Stock Items' => $stockBalances->count()]" 
+    />
 </div>
 
 <!-- Stock Cards / Balances Table -->
@@ -161,5 +179,17 @@
         {{ $transactions->links() }}
     </div>
     @endif
+</div>
+
+<!-- Print-Only Executive Document Signatures -->
+<div class="d-none d-print-block mt-4">
+    <x-print-footer 
+        :company="$currentCompany"
+        preparedTitle="Storekeeper / Warehouse Clerk"
+        checkedTitle="Warehouse Operations Lead"
+        approvedTitle="Procurement & Inventory Manager"
+        notes="Physical stock counts are periodically reconciled against moving average valuations and verified goods receipt challans."
+        :showWatermark="true"
+    />
 </div>
 @endsection
