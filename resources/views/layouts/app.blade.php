@@ -226,6 +226,47 @@
         .badge-on_hold { background-color: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
         .badge-completed { background-color: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
 
+        /* Universal Bootstrap 5 Pagination Styling */
+        .pagination {
+            margin-bottom: 0;
+            gap: 4px;
+        }
+        .pagination .page-item .page-link {
+            color: #1e3a8a;
+            border-color: #e2e8f0;
+            padding: 0.38rem 0.75rem;
+            font-size: 0.85rem;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.15s ease-in-out;
+        }
+        .pagination .page-item .page-link:hover {
+            background-color: #f1f5f9;
+            color: #1d4ed8;
+            border-color: #cbd5e1;
+        }
+        .pagination .page-item.active .page-link {
+            background-color: #1e3a8a;
+            border-color: #1e3a8a;
+            color: #ffffff;
+            box-shadow: 0 2px 4px rgba(30, 58, 138, 0.25);
+        }
+        .pagination .page-item.disabled .page-link {
+            color: #94a3b8;
+            background-color: #f8fafc;
+            border-color: #e2e8f0;
+        }
+        /* Guard against any unstyled inline pagination SVGs scaling out of proportion */
+        nav svg,
+        .pagination svg {
+            width: 14px !important;
+            height: 14px !important;
+            max-width: 14px !important;
+            max-height: 14px !important;
+            display: inline-block !important;
+            vertical-align: middle !important;
+        }
+
         /* Footer */
         .footer {
             background-color: #ffffff;
