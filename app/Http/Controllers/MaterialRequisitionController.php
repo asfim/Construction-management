@@ -20,18 +20,33 @@ class MaterialRequisitionController extends Controller
 
         $companyId = $tenantManager->currentCompanyId();
         $projectId = $tenantManager->currentProjectId();
-        $status = $request->string('status')->trim();
+        $status = $request->string('status')->trim()->value();
 
-        $requisitions = MaterialRequisition::query()
+        // Default to unapproved if no status filter was specified
+        if (! $request->has('status') || $status === '') {
+            $status = 'unapproved';
+        }
+
+        $baseQuery = MaterialRequisition::query()
             ->when($companyId, fn ($q) => $q->where('company_id', $companyId))
-            ->when($projectId, fn ($q) => $q->where('project_id', $projectId))
-            ->when($status->isNotEmpty(), fn ($q) => $q->where('status', $status->value()))
+            ->when($projectId, fn ($q) => $q->where('project_id', $projectId));
+
+        $counts = [
+            'unapproved' => (clone $baseQuery)->where('status', '!=', 'approved')->count(),
+            'approved' => (clone $baseQuery)->where('status', 'approved')->count(),
+            'all' => (clone $baseQuery)->count(),
+        ];
+
+        $requisitions = (clone $baseQuery)
+            ->when($status === 'unapproved', fn ($q) => $q->where('status', '!=', 'approved'))
+            ->when($status === 'approved', fn ($q) => $q->where('status', 'approved'))
+            ->when(! in_array($status, ['unapproved', 'approved', 'all']), fn ($q) => $q->where('status', $status))
             ->with(['project', 'submittedBy', 'items.item'])
             ->latest()
             ->paginate(15)
             ->withQueryString();
 
-        return view('material-requisitions.index', compact('requisitions', 'status'));
+        return view('material-requisitions.index', compact('requisitions', 'status', 'counts'));
     }
 
     public function create(TenantManager $tenantManager): View

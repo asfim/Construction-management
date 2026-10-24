@@ -18,18 +18,35 @@ class ClientBillController extends Controller
 
         $companyId = $tenantManager->currentCompanyId();
         $projectId = $tenantManager->currentProjectId();
-        $status = $request->string('status')->trim();
+        $status = $request->string('status')->trim()->value();
 
-        $bills = ClientBill::query()
+        // Default to uncertified (submitted) if no status was specified
+        if (! $request->has('status') || $status === '') {
+            $status = 'unapproved';
+        }
+
+        $baseQuery = ClientBill::query()
             ->when($companyId, fn ($q) => $q->where('company_id', $companyId))
-            ->when($projectId, fn ($q) => $q->where('project_id', $projectId))
-            ->when($status->isNotEmpty(), fn ($q) => $q->where('status', $status->value()))
+            ->when($projectId, fn ($q) => $q->where('project_id', $projectId));
+
+        $counts = [
+            'unapproved' => (clone $baseQuery)->where('status', 'submitted')->count(),
+            'approved' => (clone $baseQuery)->whereIn('status', ['certified', 'paid'])->count(),
+            'all' => (clone $baseQuery)->count(),
+        ];
+
+        $bills = (clone $baseQuery)
+            ->when($status === 'unapproved' || $status === 'submitted', fn ($q) => $q->where('status', 'submitted'))
+            ->when($status === 'approved', fn ($q) => $q->whereIn('status', ['certified', 'paid']))
+            ->when($status === 'certified', fn ($q) => $q->where('status', 'certified'))
+            ->when($status === 'paid', fn ($q) => $q->where('status', 'paid'))
+            ->when(! in_array($status, ['unapproved', 'submitted', 'approved', 'certified', 'paid', 'all']), fn ($q) => $q->where('status', $status))
             ->with(['project', 'creator', 'certifier', 'items'])
             ->latest('bill_date')
             ->paginate(15)
             ->withQueryString();
 
-        return view('client-bills.index', compact('bills', 'status'));
+        return view('client-bills.index', compact('bills', 'status', 'counts'));
     }
 
     public function create(Request $request, TenantManager $tenantManager): View

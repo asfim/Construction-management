@@ -16,27 +16,60 @@
     @endcan
 </div>
 
-<!-- Filters -->
+<!-- Filters & Approval Workflow Tabs -->
 <div class="card card-custom border-0 shadow-sm mb-4">
     <div class="card-body p-3">
-        <form method="GET" action="{{ route('client-bills.index') }}" class="row g-2 align-items-center">
-            <div class="col-12 col-md-4">
-                <select name="status" class="form-select">
-                    <option value="">All Statuses</option>
-                    <option value="submitted" {{ $status == 'submitted' ? 'selected' : '' }}>Submitted</option>
+        <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+            <!-- Client Bill Approval Tabs -->
+            <ul class="nav nav-pills gap-2">
+                <li class="nav-item">
+                    <a class="nav-link py-2 px-3 {{ in_array($status, ['unapproved', 'submitted']) ? 'active' : '' }}" 
+                       href="{{ route('client-bills.index', ['status' => 'submitted']) }}">
+                        <i class="bi bi-clock-history me-1"></i>
+                        <span>Pending Certification</span>
+                        <span class="badge {{ in_array($status, ['unapproved', 'submitted']) ? 'bg-white text-primary' : 'bg-warning-subtle text-warning-emphasis' }} ms-1 rounded-pill">
+                            {{ $counts['unapproved'] }}
+                        </span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link py-2 px-3 {{ in_array($status, ['approved', 'certified', 'paid']) ? 'active' : '' }}" 
+                       href="{{ route('client-bills.index', ['status' => 'approved']) }}">
+                        <i class="bi bi-patch-check me-1"></i>
+                        <span>Certified / Paid</span>
+                        <span class="badge {{ in_array($status, ['approved', 'certified', 'paid']) ? 'bg-white text-primary' : 'bg-success-subtle text-success' }} ms-1 rounded-pill">
+                            {{ $counts['approved'] }}
+                        </span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link py-2 px-3 {{ $status === 'all' ? 'active' : '' }}" 
+                       href="{{ route('client-bills.index', ['status' => 'all']) }}">
+                        <i class="bi bi-collection me-1"></i>
+                        <span>All Bills</span>
+                        <span class="badge {{ $status === 'all' ? 'bg-white text-primary' : 'bg-secondary-subtle text-secondary' }} ms-1 rounded-pill">
+                            {{ $counts['all'] }}
+                        </span>
+                    </a>
+                </li>
+            </ul>
+
+            <!-- Specific Filter Dropdown -->
+            <form method="GET" action="{{ route('client-bills.index') }}" class="d-flex align-items-center gap-2">
+                <label class="form-label small text-muted mb-0 text-nowrap">Filter By:</label>
+                <select name="status" class="form-select form-select-sm" onchange="this.form.submit()" style="min-width: 170px;">
+                    <option value="submitted" {{ in_array($status, ['submitted', 'unapproved']) ? 'selected' : '' }}>Pending Certification</option>
                     <option value="certified" {{ $status == 'certified' ? 'selected' : '' }}>Certified</option>
                     <option value="paid" {{ $status == 'paid' ? 'selected' : '' }}>Paid</option>
+                    <option value="all" {{ $status == 'all' ? 'selected' : '' }}>All Statuses</option>
                 </select>
-            </div>
-            <div class="col-12 col-md-3 d-flex gap-2">
-                <button type="submit" class="btn btn-primary flex-grow-1">
-                    <i class="bi bi-funnel me-1"></i> Filter
-                </button>
-                <a href="{{ route('client-bills.index') }}" class="btn btn-outline-secondary" title="Reset">
-                    <i class="bi bi-arrow-clockwise"></i>
+                @if(! in_array($status, ['unapproved', 'submitted']))
+                <a href="{{ route('client-bills.index') }}" class="btn btn-sm btn-outline-secondary text-nowrap" title="Reset to Pending Certification">
+                    <i class="bi bi-arrow-clockwise me-1"></i> Reset
                 </a>
-            </div>
-        </form>
+                @endif
+            </form>
+        </div>
     </div>
 </div>
 
@@ -94,7 +127,7 @@
                             </span>
                             @else
                             <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle">
-                                <i class="bi bi-clock me-1"></i> Submitted
+                                <i class="bi bi-clock me-1"></i> Submitted (Pending)
                             </span>
                             @endif
                         </td>
@@ -107,7 +140,19 @@
                     @empty
                     <tr>
                         <td colspan="8" class="text-center py-5 text-muted">
-                            No Running Account bills recorded yet.
+                            <i class="bi bi-inbox fs-1 d-block mb-2 text-secondary opacity-50"></i>
+                            @if(in_array($status, ['unapproved', 'submitted']))
+                                <span>No client bills currently pending certification.</span>
+                                <div class="mt-2">
+                                    <a href="{{ route('client-bills.index', ['status' => 'all']) }}" class="btn btn-sm btn-outline-secondary">
+                                        View All Bills ({{ $counts['all'] }})
+                                    </a>
+                                </div>
+                            @elseif(in_array($status, ['approved', 'certified', 'paid']))
+                                <span>No certified or paid client bills found.</span>
+                            @else
+                                <span>No Running Account bills recorded yet.</span>
+                            @endif
                         </td>
                     </tr>
                     @endforelse

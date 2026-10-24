@@ -18,18 +18,34 @@ class DailyProgressReportController extends Controller
 
         $companyId = $tenantManager->currentCompanyId();
         $projectId = $tenantManager->currentProjectId();
-        $status = $request->string('status')->trim();
+        $status = $request->string('status')->trim()->value();
 
-        $reports = DailyProgressReport::query()
+        // Default to unapproved if no status was specified
+        if (! $request->has('status') || $status === '') {
+            $status = 'unapproved';
+        }
+
+        $baseQuery = DailyProgressReport::query()
             ->when($companyId, fn ($q) => $q->where('company_id', $companyId))
-            ->when($projectId, fn ($q) => $q->where('project_id', $projectId))
-            ->when($status->isNotEmpty(), fn ($q) => $q->where('status', $status->value()))
+            ->when($projectId, fn ($q) => $q->where('project_id', $projectId));
+
+        $counts = [
+            'unapproved' => (clone $baseQuery)->where('status', '!=', 'approved')->count(),
+            'approved' => (clone $baseQuery)->where('status', 'approved')->count(),
+            'all' => (clone $baseQuery)->count(),
+        ];
+
+        $reports = (clone $baseQuery)
+            ->when($status === 'unapproved', fn ($q) => $q->where('status', '!=', 'approved'))
+            ->when($status === 'submitted', fn ($q) => $q->where('status', 'submitted'))
+            ->when($status === 'approved', fn ($q) => $q->where('status', 'approved'))
+            ->when(! in_array($status, ['unapproved', 'submitted', 'approved', 'all']), fn ($q) => $q->where('status', $status))
             ->with(['project', 'siteEngineer', 'approver', 'activities'])
             ->latest('report_date')
             ->paginate(15)
             ->withQueryString();
 
-        return view('dpr.index', compact('reports', 'status'));
+        return view('dpr.index', compact('reports', 'status', 'counts'));
     }
 
     public function create(Request $request, TenantManager $tenantManager): View

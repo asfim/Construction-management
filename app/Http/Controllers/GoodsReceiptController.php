@@ -20,18 +20,33 @@ class GoodsReceiptController extends Controller
 
         $companyId = $tenantManager->currentCompanyId();
         $projectId = $tenantManager->currentProjectId();
-        $status = $request->string('status')->trim();
+        $status = $request->string('status')->trim()->value();
 
-        $goodsReceipts = GoodsReceipt::query()
+        // Default to unapproved (draft inspection pending) if no status was specified
+        if (! $request->has('status') || $status === '') {
+            $status = 'unapproved';
+        }
+
+        $baseQuery = GoodsReceipt::query()
             ->when($companyId, fn ($q) => $q->where('company_id', $companyId))
-            ->when($projectId, fn ($q) => $q->where('project_id', $projectId))
-            ->when($status->isNotEmpty(), fn ($q) => $q->where('status', $status->value()))
+            ->when($projectId, fn ($q) => $q->where('project_id', $projectId));
+
+        $counts = [
+            'unapproved' => (clone $baseQuery)->where('status', 'draft')->count(),
+            'approved' => (clone $baseQuery)->where('status', 'approved')->count(),
+            'all' => (clone $baseQuery)->count(),
+        ];
+
+        $goodsReceipts = (clone $baseQuery)
+            ->when($status === 'unapproved' || $status === 'draft', fn ($q) => $q->where('status', 'draft'))
+            ->when($status === 'approved', fn ($q) => $q->where('status', 'approved'))
+            ->when(! in_array($status, ['unapproved', 'draft', 'approved', 'all']), fn ($q) => $q->where('status', $status))
             ->with(['project', 'purchaseOrder.supplier', 'warehouse', 'receiver', 'items.item'])
             ->latest()
             ->paginate(15)
             ->withQueryString();
 
-        return view('goods-receipts.index', compact('goodsReceipts', 'status'));
+        return view('goods-receipts.index', compact('goodsReceipts', 'status', 'counts'));
     }
 
     public function create(Request $request, TenantManager $tenantManager): View

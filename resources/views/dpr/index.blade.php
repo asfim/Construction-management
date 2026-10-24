@@ -16,26 +16,60 @@
     @endcan
 </div>
 
-<!-- Filters -->
+<!-- Filters & Approval Workflow Tabs -->
 <div class="card card-custom border-0 shadow-sm mb-4">
     <div class="card-body p-3">
-        <form method="GET" action="{{ route('dpr.index') }}" class="row g-2 align-items-center">
-            <div class="col-12 col-md-4">
-                <select name="status" class="form-select">
-                    <option value="">All Statuses</option>
-                    <option value="submitted" {{ $status == 'submitted' ? 'selected' : '' }}>Submitted</option>
+        <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+            <!-- DPR Approval Tabs -->
+            <ul class="nav nav-pills gap-2">
+                <li class="nav-item">
+                    <a class="nav-link py-2 px-3 {{ in_array($status, ['unapproved', 'submitted']) ? 'active' : '' }}" 
+                       href="{{ route('dpr.index', ['status' => 'submitted']) }}">
+                        <i class="bi bi-clock-history me-1"></i>
+                        <span>Pending Approval (Submitted)</span>
+                        <span class="badge {{ in_array($status, ['unapproved', 'submitted']) ? 'bg-white text-primary' : 'bg-warning-subtle text-warning-emphasis' }} ms-1 rounded-pill">
+                            {{ $counts['unapproved'] }}
+                        </span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link py-2 px-3 {{ $status === 'approved' ? 'active' : '' }}" 
+                       href="{{ route('dpr.index', ['status' => 'approved']) }}">
+                        <i class="bi bi-check2-circle me-1"></i>
+                        <span>Approved</span>
+                        <span class="badge {{ $status === 'approved' ? 'bg-white text-primary' : 'bg-success-subtle text-success' }} ms-1 rounded-pill">
+                            {{ $counts['approved'] }}
+                        </span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link py-2 px-3 {{ $status === 'all' ? 'active' : '' }}" 
+                       href="{{ route('dpr.index', ['status' => 'all']) }}">
+                        <i class="bi bi-collection me-1"></i>
+                        <span>All Reports</span>
+                        <span class="badge {{ $status === 'all' ? 'bg-white text-primary' : 'bg-secondary-subtle text-secondary' }} ms-1 rounded-pill">
+                            {{ $counts['all'] }}
+                        </span>
+                    </a>
+                </li>
+            </ul>
+
+            <!-- Specific Filter Dropdown -->
+            <form method="GET" action="{{ route('dpr.index') }}" class="d-flex align-items-center gap-2">
+                <label class="form-label small text-muted mb-0 text-nowrap">Filter By:</label>
+                <select name="status" class="form-select form-select-sm" onchange="this.form.submit()" style="min-width: 170px;">
+                    <option value="submitted" {{ in_array($status, ['submitted', 'unapproved']) ? 'selected' : '' }}>Pending Approval (Submitted)</option>
                     <option value="approved" {{ $status == 'approved' ? 'selected' : '' }}>Approved</option>
+                    <option value="draft" {{ $status == 'draft' ? 'selected' : '' }}>Draft</option>
+                    <option value="all" {{ $status == 'all' ? 'selected' : '' }}>All Statuses</option>
                 </select>
-            </div>
-            <div class="col-12 col-md-3 d-flex gap-2">
-                <button type="submit" class="btn btn-primary flex-grow-1">
-                    <i class="bi bi-funnel me-1"></i> Filter
-                </button>
-                <a href="{{ route('dpr.index') }}" class="btn btn-outline-secondary" title="Reset">
-                    <i class="bi bi-arrow-clockwise"></i>
+                @if(! in_array($status, ['unapproved', 'submitted']))
+                <a href="{{ route('dpr.index') }}" class="btn btn-sm btn-outline-secondary text-nowrap" title="Reset to Pending Approval">
+                    <i class="bi bi-arrow-clockwise me-1"></i> Reset
                 </a>
-            </div>
-        </form>
+                @endif
+            </form>
+        </div>
     </div>
 </div>
 
@@ -117,7 +151,19 @@
                     @empty
                     <tr>
                         <td colspan="8" class="text-center py-5 text-muted">
-                            No Daily Progress Reports recorded.
+                            <i class="bi bi-inbox fs-1 d-block mb-2 text-secondary opacity-50"></i>
+                            @if(in_array($status, ['unapproved', 'submitted']))
+                                <span>No daily progress reports currently pending approval.</span>
+                                <div class="mt-2">
+                                    <a href="{{ route('dpr.index', ['status' => 'all']) }}" class="btn btn-sm btn-outline-secondary">
+                                        View All Reports ({{ $counts['all'] }})
+                                    </a>
+                                </div>
+                            @elseif($status === 'approved')
+                                <span>No approved daily progress reports found.</span>
+                            @else
+                                <span>No Daily Progress Reports recorded.</span>
+                            @endif
                         </td>
                     </tr>
                     @endforelse
