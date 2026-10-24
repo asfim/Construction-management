@@ -142,6 +142,14 @@ test('print views dynamically render updated company name, address, phone, tax i
         $mrResponse->assertSee('print-document-header');
         $mrResponse->assertSee('print-document-footer');
     }
+
+    // 7. Audit Trail Report Print View
+    $auditResponse = $this->actingAs($admin)->get(route('audit-logs.index'));
+    $auditResponse->assertOk();
+    $auditResponse->assertSee('Apex Infra Global Limited');
+    $auditResponse->assertSee('+8801999888777');
+    $auditResponse->assertSee('print-document-header');
+    $auditResponse->assertSee('print-document-footer');
 });
 
 test('single company mode enforces one company and redirects index and create to edit page', function () {

@@ -3,8 +3,27 @@
 @section('title', __('erp.nav.audit_logs'))
 
 @section('content')
-<!-- Page Header -->
-<div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-4 gap-3">
+<!-- Print Document Official Header -->
+<div class="d-none d-print-block mb-3">
+    <x-print-header 
+        title="SYSTEM AUDIT TRAIL & COMPLIANCE LOG"
+        subtitle="Official immutable event log & activity history"
+        docNumberLabel="Total Logs"
+        :docNumber="$logs->total() . ' Records'"
+        docDateLabel="Print Date"
+        :docDate="now()->format('d M Y, h:i A')"
+        status="Official Record"
+        statusClass="bg-dark"
+        :extraMeta="array_filter([
+            'Action Filter' => !empty($action) ? ucfirst($action) : 'All Actions',
+            'Module Filter' => !empty($entityType) ? ($availableEntities[$entityType] ?? $entityType) : null,
+            'Printed By' => auth()->user()->name ?? 'System Administrator',
+        ])"
+    />
+</div>
+
+<!-- Page Header (Web Screen Only) -->
+<div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-4 gap-3 d-print-none">
     <div>
         <div class="d-flex align-items-center gap-2 mb-1">
             <h4 class="fw-bold mb-0 text-dark">Audit Trail &amp; Security Logs</h4>
@@ -26,8 +45,8 @@
     </div>
 </div>
 
-<!-- KPI / Metric Cards -->
-<div class="row g-3 mb-4">
+<!-- KPI / Metric Cards (Web Screen Only) -->
+<div class="row g-3 mb-4 d-print-none">
     <!-- Total Events -->
     <div class="col-6 col-md-4 col-xl">
         <a href="{{ route('audit-logs.index') }}" class="text-decoration-none">
@@ -119,8 +138,8 @@
     </div>
 </div>
 
-<!-- Advanced Search & Filter Bar -->
-<div class="card card-custom border-0 shadow-sm mb-4">
+<!-- Advanced Search & Filter Bar (Web Screen Only) -->
+<div class="card card-custom border-0 shadow-sm mb-4 d-print-none">
     <div class="card-body p-3 p-md-4">
         <form method="GET" action="{{ route('audit-logs.index') }}">
             <div class="row g-3">
@@ -205,9 +224,9 @@
     </div>
 </div>
 
-<!-- Active Filter Badges (if any applied) -->
+<!-- Active Filter Badges (Web Screen Only) -->
 @if(!empty($action) || !empty($userId) || !empty($entityType) || !empty($search) || !empty($dateFrom) || !empty($dateTo))
-<div class="d-flex align-items-center flex-wrap gap-2 mb-3">
+<div class="d-flex align-items-center flex-wrap gap-2 mb-3 d-print-none">
     <span class="small text-muted fw-semibold">Active Filters:</span>
     @if(!empty($search))
         <span class="badge bg-light text-dark border">
@@ -245,19 +264,19 @@
 @endif
 
 <!-- Audit Trail Table -->
-<div class="card card-custom border-0 shadow-sm">
+<div class="card card-custom border-0 shadow-sm mb-4">
     <div class="card-body p-0">
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-light text-muted small text-uppercase" style="font-size: 0.76rem; letter-spacing: 0.5px;">
                     <tr>
-                        <th style="width: 170px;" class="ps-3">Timestamp</th>
-                        <th>User &amp; Origin</th>
-                        <th style="width: 120px;">Action</th>
-                        <th>Entity &amp; Target</th>
-                        <th>Activity Summary</th>
-                        <th style="width: 140px;">IP / Network</th>
-                        <th class="text-end pe-3" style="width: 110px;">Details</th>
+                        <th class="col-timestamp ps-3">Timestamp</th>
+                        <th class="col-user">User &amp; Origin</th>
+                        <th class="col-action">Action</th>
+                        <th class="col-entity">Entity &amp; Target</th>
+                        <th class="col-summary">Activity Summary</th>
+                        <th class="col-ip">IP / Network</th>
+                        <th class="text-end pe-3 d-print-none col-details" style="width: 100px;">Details</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -315,25 +334,25 @@
                     @endphp
                     <tr>
                         <!-- Timestamp -->
-                        <td class="ps-3 text-nowrap">
+                        <td class="col-timestamp ps-3">
                             <div class="fw-semibold text-dark small">{{ $log->created_at->format('d M Y') }}</div>
                             <div class="text-muted" style="font-size: 0.75rem;">
-                                <i class="bi bi-clock me-1"></i>{{ $log->created_at->format('h:i:s A') }}
-                                <span class="badge bg-light text-secondary border ms-1" style="font-size: 0.68rem;">
+                                <i class="bi bi-clock me-1 d-print-none"></i>{{ $log->created_at->format('h:i:s A') }}
+                                <span class="badge bg-light text-secondary border ms-1 d-print-none" style="font-size: 0.68rem;">
                                     {{ $log->created_at->diffForHumans(null, true) }}
                                 </span>
                             </div>
                         </td>
 
                         <!-- User & Origin -->
-                        <td>
+                        <td class="col-user">
                             <div class="d-flex align-items-center gap-2">
-                                <div class="rounded-circle bg-primary-subtle text-primary fw-bold d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; font-size: 0.8rem;">
+                                <div class="rounded-circle bg-primary-subtle text-primary fw-bold d-flex align-items-center justify-content-center d-print-none" style="width: 30px; height: 30px; font-size: 0.8rem; flex-shrink: 0;">
                                     {{ mb_substr($log->user_name ?? 'S', 0, 1) }}
                                 </div>
-                                <div>
+                                <div class="text-break">
                                     <span class="fw-semibold text-dark d-block leading-tight small">
-                                        {{ $log->user_name ?? 'System Automated' }}
+                                        {{ $log->user_name ?? 'System' }}
                                     </span>
                                     <small class="text-muted" style="font-size: 0.72rem;">
                                         {{ $log->user?->email ?? ($log->user_id ? 'User #' . $log->user_id : 'System Daemon') }}
@@ -343,18 +362,18 @@
                         </td>
 
                         <!-- Action -->
-                        <td>
+                        <td class="col-action">
                             <span class="badge {{ $badgeClass }} text-uppercase d-inline-flex align-items-center gap-1 py-1 px-2" style="font-size: 0.72rem;">
-                                <i class="bi {{ $actionIcon }}"></i>
+                                <i class="bi {{ $actionIcon }} d-print-none"></i>
                                 <span>{{ $log->action }}</span>
                             </span>
                         </td>
 
                         <!-- Entity & Target -->
-                        <td>
+                        <td class="col-entity">
                             <div class="d-flex align-items-center gap-1 flex-wrap">
                                 <span class="badge bg-light text-dark border d-inline-flex align-items-center gap-1">
-                                    <i class="bi {{ $entityIcon }} text-primary"></i>
+                                    <i class="bi {{ $entityIcon }} text-primary d-print-none"></i>
                                     <strong>{{ $entityName ?: 'System' }}</strong>
                                     @if($log->auditable_id)
                                     <span class="text-muted">#{{ $log->auditable_id }}</span>
@@ -362,44 +381,44 @@
                                 </span>
                                 @if($log->project)
                                 <span class="badge bg-primary-subtle text-primary border border-primary-subtle" title="Associated Project">
-                                    <i class="bi bi-kanban me-1"></i>{{ Str::limit($log->project->name, 18) }}
+                                    <i class="bi bi-kanban me-1 d-print-none"></i>{{ Str::limit($log->project->name, 22) }}
                                 </span>
                                 @endif
                             </div>
                         </td>
 
                         <!-- Description & Inline Diff Summary -->
-                        <td>
+                        <td class="col-summary">
                             <div class="small text-dark font-sans-serif">{{ $log->description }}</div>
                             @if(!empty($changedKeys))
                             <div class="mt-1 d-flex align-items-center gap-1 flex-wrap">
                                 <span class="badge bg-light text-secondary border font-monospace" style="font-size: 0.68rem;">
                                     {{ count($changedKeys) }} {{ count($changedKeys) === 1 ? 'field' : 'fields' }}:
                                 </span>
-                                @foreach(array_slice($changedKeys, 0, 3) as $k)
+                                @foreach(array_slice($changedKeys, 0, 4) as $k)
                                 <span class="badge bg-secondary-subtle text-secondary" style="font-size: 0.68rem;">{{ $k }}</span>
                                 @endforeach
-                                @if(count($changedKeys) > 3)
-                                <span class="text-muted small" style="font-size: 0.68rem;">+{{ count($changedKeys) - 3 }} more</span>
+                                @if(count($changedKeys) > 4)
+                                <span class="text-muted small" style="font-size: 0.68rem;">+{{ count($changedKeys) - 4 }} more</span>
                                 @endif
                             </div>
                             @endif
                         </td>
 
                         <!-- IP Address / Network -->
-                        <td class="text-nowrap">
+                        <td class="col-ip">
                             <div class="small font-monospace text-dark">
-                                <i class="bi bi-globe me-1 text-muted"></i>{{ $log->ip_address ?? '—' }}
+                                <i class="bi bi-globe me-1 text-muted d-print-none"></i>{{ $log->ip_address ?? '—' }}
                             </div>
                             @if($log->user_agent)
-                            <div class="text-muted text-truncate" style="font-size: 0.7rem; max-width: 130px;" title="{{ $log->user_agent }}">
-                                <i class="bi bi-laptop me-1"></i>{{ Str::limit($log->user_agent, 20) }}
+                            <div class="text-muted text-truncate d-print-none" style="font-size: 0.7rem; max-width: 120px;" title="{{ $log->user_agent }}">
+                                <i class="bi bi-laptop me-1"></i>{{ Str::limit($log->user_agent, 18) }}
                             </div>
                             @endif
                         </td>
 
-                        <!-- Details Action -->
-                        <td class="text-end pe-3">
+                        <!-- Details Action (Web Screen Only) -->
+                        <td class="text-end pe-3 d-print-none col-details">
                             <button type="button" 
                                     class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1 shadow-sm inspect-log-btn"
                                     data-id="{{ $log->id }}"
@@ -430,7 +449,7 @@
                                 </div>
                                 <h6 class="fw-bold text-dark mb-1">No Audit Records Found</h6>
                                 <p class="text-muted small mb-3">No system activity logs matched your selected filter criteria.</p>
-                                <a href="{{ route('audit-logs.index') }}" class="btn btn-sm btn-outline-primary">
+                                <a href="{{ route('audit-logs.index') }}" class="btn btn-sm btn-outline-primary d-print-none">
                                     <i class="bi bi-arrow-counterclockwise me-1"></i> Reset All Filters
                                 </a>
                             </div>
@@ -442,16 +461,32 @@
         </div>
     </div>
 
-    <!-- Pagination Footer -->
+    <!-- Pagination Footer (Web Screen Only) -->
     @if($logs->hasPages())
-    <div class="card-footer bg-white border-top py-3">
+    <div class="card-footer bg-white border-top py-3 d-print-none">
         {{ $logs->links() }}
     </div>
     @endif
 </div>
 
-<!-- SINGLE REUSABLE AUDIT LOG DETAILS MODAL (Placed outside the table and card) -->
-<div class="modal fade" id="auditInspectModal" tabindex="-1" aria-labelledby="auditInspectModalLabel" aria-hidden="true">
+<!-- Print Document Official Footer -->
+<div class="d-none d-print-block mt-4">
+    <x-print-footer 
+        preparedTitle="Audited / Printed By"
+        :preparedBy="auth()->user()->name ?? 'System Administrator'"
+        :preparedDate="now()->format('d M Y')"
+        checkedTitle="Verified By (Compliance)"
+        checkedBy="Internal Audit & QA"
+        :checkedDate="now()->format('d M Y')"
+        approvedTitle="Approved By (Management)"
+        approvedBy="Managing Director"
+        :approvedDate="now()->format('d M Y')"
+        notes="This audit trail report is generated directly from immutable system audit records. Any unauthorized alteration or reproduction is strictly prohibited."
+    />
+</div>
+
+<!-- SINGLE REUSABLE AUDIT LOG DETAILS MODAL (Web Screen Only, Placed outside table) -->
+<div class="modal fade d-print-none" id="auditInspectModal" tabindex="-1" aria-labelledby="auditInspectModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content border-0 shadow">
             <div class="modal-header bg-light py-3">
@@ -520,13 +555,114 @@
     transform: translateY(-2px);
     box-shadow: 0 .5rem 1rem rgba(0,0,0,.08)!important;
 }
+
+@page {
+    size: landscape;
+    margin: 8mm 6mm;
+}
+
 @media print {
-    .topbar, .sidebar, .btn, .card-footer, form, .badge-filter {
+    /* Hide all web chrome elements */
+    .d-print-none,
+    .topbar,
+    .sidebar,
+    .btn,
+    .card-footer,
+    form,
+    .badge-filter,
+    .footer {
         display: none !important;
     }
+
+    body {
+        background: #ffffff !important;
+        color: #0f172a !important;
+        font-size: 8pt !important;
+    }
+
     .main-wrapper {
         margin: 0 !important;
         padding: 0 !important;
+        min-height: auto !important;
+    }
+
+    .content-body {
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    .card, .card-custom {
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        background: transparent !important;
+    }
+
+    .card-body {
+        padding: 0 !important;
+    }
+
+    .table-responsive {
+        overflow: visible !important;
+        display: block !important;
+        width: 100% !important;
+    }
+
+    /* Fixed table layout guaranteeing 100% fit on page */
+    .table {
+        width: 100% !important;
+        max-width: 100% !important;
+        table-layout: fixed !important;
+        border-collapse: collapse !important;
+        font-size: 7.8pt !important;
+    }
+
+    .col-timestamp { width: 14% !important; }
+    .col-user      { width: 16% !important; }
+    .col-action    { width: 10% !important; }
+    .col-entity    { width: 18% !important; }
+    .col-summary   { width: 30% !important; }
+    .col-ip        { width: 12% !important; }
+
+    .table th, .table td {
+        padding: 4px 5px !important;
+        word-break: break-word !important;
+        overflow-wrap: break-word !important;
+        white-space: normal !important;
+        vertical-align: top !important;
+        border: 1px solid #cbd5e1 !important;
+    }
+
+    .table > thead > tr > th {
+        background-color: #f1f5f9 !important;
+        color: #0f172a !important;
+        font-weight: 700 !important;
+        font-size: 7.5pt !important;
+        text-transform: uppercase !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .badge {
+        border: 1px solid #94a3b8 !important;
+        background: #f8fafc !important;
+        color: #0f172a !important;
+        font-size: 7pt !important;
+        padding: 1px 3px !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    tr {
+        page-break-inside: avoid !important;
+    }
+
+    .print-document-header {
+        page-break-after: avoid !important;
+    }
+    .print-document-footer {
+        page-break-inside: avoid !important;
     }
 }
 </style>
