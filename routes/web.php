@@ -26,6 +26,7 @@ use App\Http\Controllers\TenantSwitchController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WarehouseController;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
 // Public & Authentication Routes
@@ -120,3 +121,43 @@ Route::middleware(['auth'])->group(function () {
     // Audit Logs
     Route::get('/audit-logs', [AuditLogController::class, 'index'])->name('audit-logs.index');
 });
+
+// System Maintenance Utilities (Cache Clear & Storage Link) - bypass web/session middleware so DB connection is not required
+Route::withoutMiddleware('web')->group(function () {
+    Route::get('/clear-cache', function () {
+        Artisan::call('optimize:clear');
+        return 'All caches (cache, route, config, view) cleared successfully!';
+    });
+
+    Route::get('/storage-link', function () {
+        Artisan::call('storage:link');
+        return 'Storage link created successfully!';
+    });
+
+    Route::get('/route-clear', function () {
+        Artisan::call('route:clear');
+        return 'Route cache cleared successfully!';
+    });
+
+    Route::get('/config-clear', function () {
+        Artisan::call('config:clear');
+        return 'Config cache cleared successfully!';
+    });
+
+    Route::get('/view-clear', function () {
+        Artisan::call('view:clear');
+        return 'Compiled views cleared successfully!';
+    });
+
+    Route::get('/run-migrate', function () {
+        Artisan::call('migrate', ['--force' => true]);
+        return '<h3>Migration Result:</h3><pre>' . Artisan::output() . '</pre>';
+    });
+
+    Route::get('/run-seed', function () {
+        Artisan::call('db:seed', ['--force' => true]);
+        return '<h3>Seeder Result:</h3><pre>' . Artisan::output() . '</pre>';
+    });
+});
+
+
